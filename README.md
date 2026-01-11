@@ -1,0 +1,1714 @@
+# hlib
+
+![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: library](https://img.shields.io/badge/Type-library-informational?style=flat-square)
+
+A reusable Helm library chart that provides common Kubernetes template primitives for building consistent, maintainable charts across GT applications.
+This library eliminates code duplication by offering pre-built templates for standard Kubernetes resources including deployments, services, ingress, RBAC, jobs, and more. Charts using this library benefit from standardized configurations, predefined resource tiers, and consistent labeling patterns.
+
+## Requirements
+
+Kubernetes: `>=1.32.0-0`
+
+The library may include new resource parameters that are recently added, enabled by default, and marked as at least a beta feature.
+Also, some old parameters and API versions may be deprecated and their support removed from the library.
+
+## Getting started
+
+To properly manage your Helm chart and its dependencies,
+you will need to configure the Git repository and adjust CI pipeline.
+
+### Git Configuration:
+
+- `Chart.yaml`: To include `hlib` dependency, it is needed to add a dependencies section to this file, for example
+
+    ```yaml
+    apiVersion: v2
+    description: Helm chart to deploy microservice
+    name: Microservice
+    version: 1.0.0
+    dependencies:
+      - name: hlib
+        version: <desired_library_version>
+        repository: https://github.com/anatolek/hlib
+    ```
+
+- `.helmignore`: It is important to exclude unnecessary files and directories from your chart package.
+  Add it to the helm chart folder.
+
+  ```text
+  # Patterns to ignore when building packages.
+  # This supports shell glob matching, relative path matching, and
+  # negation (prefixed with !). Only one pattern per line.
+  .DS_Store
+  # Common VCS dirs
+  .git/
+  .gitignore
+  .bzr/
+  .bzrignore
+  .hg/
+  .hgignore
+  .svn/
+  # Common backup files
+  *.swp
+  *.bak
+  *.tmp
+  *.orig
+  *~
+  # Helm
+  .helmignore
+  # Various IDEs
+  .project
+  .idea/
+  *.tmproj
+  .vscode/
+  ```
+
+- `.gitignore`: It is important to include the `charts/` in this file to avoid including unnecessary duplicate content in a git repository.
+  This file is usually located in the root of the repository.
+
+  ```text
+  # .gitignore
+  charts/
+  ```
+
+- `Chart.lock`: It locks the versions of the dependencies.
+  Run `helm dependency update` to generate this file, and then commit it to your Git repository.
+
+### CI Pipeline Configuration:
+
+Issue the following commands to add the Helm repository that contains the library chart, update dependencies, and push chart artifact:
+
+```shell
+helm lint <helm_chart_location>  # optionally
+helm repo add hlib https://github.com/anatolek/hlib
+helm dependency build <helm_chart_location>
+helm package <helm_chart_location>
+```
+
+#### `helm dependency` commands explanation
+
+| Command                  | Purpose                                               | Modifies `Chart.lock`? | When to Use                                                                   |
+|--------------------------|-------------------------------------------------------|------------------------|-------------------------------------------------------------------------------|
+| `helm dependency update` | Resolves and downloads dependencies from `Chart.yaml` | ✅ Yes                  | When you add or change dependencies in `Chart.yaml`                           |
+| `helm dependency build`  | Builds the `charts/` directory from `Chart.lock`      | ❌ No                   | When you already have a `Chart.lock` and want to rebuild dependencies exactly |
+
+### Template Usage
+
+After all the settings are done, you can start using the basic templates, variables, and helper functions defined in the GT library.
+Some examples are described in the `examples/` folder.
+
+## Predefined variables
+
+These are auxiliary variables/configurations defined in the library that can be reused wherever needed.
+
+| Dependency                 | Description                                                                                                                                                                                                                                                                    |
+|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `hlib.name`           | Takes the next value in order, depending on whether override value is specified `{{ .Chart.Name }}` -> `{{ .Values.nameOverride }}`.                                                                                                                                           |
+| `hlib.fullname`       | Takes the next value in order, depending on whether override values are specified `{{ .Release.Name }}-{{ .Chart.Name }}` -> `{{ .Values.nameOverride }}` (if includes .Release.Name) -> `{{ .Release.Name }}-{{ .Values.nameOverride }}` -> `{{ .Values.fullnameOverride }}`. |
+| `hlib.chart`          | Takes the next value  `{{ .Chart.Name }}-{{ .Chart.Version }}`.                                                                                                                                                                                                                |
+| `hlib.selectorLabels` | Renders the following labels: `app.kubernetes.io/name`, `app.kubernetes.io/instance`.                                                                                                                                                                                          |
+| `hlib.labels`         | Renders the following labels: all labels that `hlib.selectorLabels` has, `helm.sh/chart`, `app.kubernetes.io/version`, `app.kubernetes.io/part-of`, `app.kubernetes.io/managed-by`.                                                                                       |
+
+## Predefined functions
+
+These are auxiliary functions defined in the library that can be reused wherever needed.
+
+### `hlib.util.merge`
+
+Merges two YAML snippets rendered by template includes.
+
+**Inputs:**
+
+- `.override` (string): Name of the override template to include and parse.
+- `.base` (string): Name of the base template to include and parse.
+- `.context` (dict): Values context for evaluating `.override`.
+
+The override values take precedence over the base.
+
+**Usage:**
+
+```go
+{{ include "hlib.util.merge" (dict "override" "template.override" "base" "template.base" "context" .) }}
+```
+
+### `hlib.util.renderEnvVars`
+
+Renders Kubernetes environment variable definitions based on input dictionary.
+
+**Inputs:**
+
+- `.env` (dict): A map of environment variable keys to values or configuration objects.
+- `.context` (dict): Optional context for evaluating values.
+
+**Supported value formats:**
+
+- List-formatted values ("slice") rendered as is.
+
+  Example:
+
+  ```yaml
+  - name: FOO
+    value: bar
+  ```
+
+  Result:
+
+  ```yaml
+  - name: "FOO"
+    value: "bar"
+  ```
+
+- Simple values (string, int, float, bool) rendered as plain `value: "<string>"`.
+
+  Example:
+  ```yaml
+  FOO: "bar"
+  ```
+
+  Result:
+
+  ```yaml
+  - name: "FOO"
+    value: "bar"
+  ```
+
+- Secret references.
+
+  Example:
+
+  ```yaml
+  SECRET:
+    secretKeyRef:
+      my-secret: password
+  ```
+
+  Result:
+
+  ```yaml
+  - name: "SECRET"
+    valueFrom:
+      secretKeyRef:
+        name: "my-secret"
+        key: "password"
+  ```
+
+- ConfigMap references.
+
+  Example:
+
+  ```yaml
+  CONFIG:
+    configMapKeyRef:
+      my-config: setting
+  ```
+
+  Result:
+
+  ```yaml
+  - name: "CONFIG"
+    valueFrom:
+      configMapKeyRef:
+        name: "my-config"
+        key: "setting"
+  ```
+
+**Ignored:**
+
+Entries with a value of `<no value>` or empty/null will be skipped.
+
+**Usage:**
+
+```go
+{{ include "hlib.util.renderEnvVars" (dict "env" .Values.env "context" .) }}
+```
+
+### `hlib.util.image`
+
+Renders a full image reference string using registry, repository, tag, or digest.
+
+**Inputs:**
+
+- `.imageRoot.repository` (string): Required. The image repository (e.g., "nginx").
+- `.imageRoot.tag` (string, optional): The image tag (e.g., "1.23.4"). Falls back to .chart.AppVersion if not set.
+- `.imageRoot.digest` (string, optional): The image digest (e.g., "sha256:abcd1234"). Overrides tag if set.
+- `.imageRoot.registry` (string, optional): The image registry (e.g., "ghcr.io/myorg"). Can also be overridden globally.
+- `.global.imageRegistry` (string, optional): Fallback registry if .imageRoot.registry is not set.
+- `.chart.AppVersion` (string, optional): Used as fallback tag if neither tag nor digest is provided.
+
+**Behavior:**
+
+- Uses "@" as separator if digest is provided, ":" otherwise.
+- If both registry and digest are set, e.g. `ghcr.io/myorg/app@sha256:abc123`
+- If tag is missing and digest is not provided, defaults to chart AppVersion.
+
+**Examples:**
+
+Input:
+
+```yaml
+imageRoot:
+  repository: myapp
+  tag: "2.0.1"
+  registry: "ghcr.io/myteam"
+```
+
+Output:
+
+```yaml
+ghcr.io/myteam/myapp:2.0.1
+```
+
+**Usage:**
+
+```go
+{{ include "hlib.util.image" (dict "imageRoot" .Values.path.to.the.image "global" .Values.global "chart" .Chart) }}
+```
+
+### `hlib.util.tplrender`
+
+This template evaluates a string or YAML object as a Helm template using the `tpl` function.
+
+**Inputs:**
+
+- `value` (any): The string or YAML structure to render (can contain Go template expressions like {{ .Values.* }}).
+- `context` (dict): The context (usually `.`) for evaluating templates.
+- `scope` (dict): (optional) The scope to be used inside a `with` block for relative references.
+
+**Behavior:**
+
+- If `value` is a plain string, it is evaluated with `tpl`.
+- If `value` is a YAML map or list, it is first serialized to YAML or JSON.
+- If the rendered content contains `{{`, `tpl` is used to evaluate it.
+- If `scope` is provided, it wraps the template in a `with` block using `RelativeScope`.
+  Use `scope` when the template string references variables not in the top-level context (like .Values.*),
+  but in local or nested structures like iteration items, condition blocks, or subfields.
+
+**Examples:**
+
+1. Rendering a plain templated string:
+   ```go
+   {{ include "hlib.util.tplrender" (dict "value" .Values.path.to.the.Value "context" $) }}
+   ```
+
+2. Rendering YAML with templates and a scope:
+   ```go
+   {{ include "hlib.util.tplrender" (dict "value" .Values.path.to.the.Value "context" $ "scope" $app) }}
+   ```
+
+**Output:**
+
+The resulting evaluated template as a string or YAML structure.
+
+### `hlib.util.springKafkaValues`
+
+This template renders prefixed Kafka values either as:
+
+1. A single value.
+
+   Example:
+
+   ```go
+   {{ include "hlib.util.springKafkaValues" (dict "prefix" "spring.kafka.listener.concurrency" "values" "3") }}
+   ```
+
+   Output:
+
+   ```yaml
+   "spring.kafka.listener.concurrency": "3"
+   ```
+
+2. A list of key=value pairs separated by semicolons.
+
+   Example:
+
+   ```go
+   {{ include "hlib.util.springKafkaValues" (dict "prefix" "spring.kafka" "values" "listener.concurrency=3;consumer.auto-offset-reset=earliest") }}
+   ```
+
+   Output:
+
+   ```yaml
+   "spring.kafka.listener.concurrency": "3"
+   "spring.kafka.consumer.auto-offset-reset": "earliest"
+   ```
+
+### `hlib.default-check-required-msg`
+
+A default message string to be used when checking for a required value
+
+**Usage:**
+
+```go
+{{- $requiredMsg := include "hlib.default-check-required-msg" $ -}}
+{{ required (printf $requiredMsg "SOME.VALUE.NAME") .Values.some.value }}
+```
+
+## Using the Helm library
+
+### `hlib.container` template
+
+Creates Kubernetes container specification.
+
+#### Basic Usage
+
+Include within your controller template (e.g., deployment):
+
+```go
+containers:
+- {{- include "hlib.container" (dict "context" . "values" .Values.container) }}
+```
+
+Add the following values
+
+```yaml
+container:
+  resourceTier: "M"
+  image:
+    repository: busybox
+```
+
+#### Configuration
+
+| Parameter      | Description                                                               | Required | Default                        |
+|----------------|---------------------------------------------------------------------------|----------|--------------------------------|
+| `context`      | Root Helm context (usually `.`)                                           | Yes      | -                              |
+| `values`       | Container configuration values (from `values.yaml`)                       | No       | `.Values.deployment.container` |
+| `env`          | Environment variables to add to the container                             | No       | -                              |
+| `override`     | Name of a template that overrides the basic one configured in the library | No       | -                              |
+
+**Environment Variables**
+
+You can assign container values to `env` parameter directly, e.g.
+
+```go
+containers:
+- {{- include "hlib.container" (dict "context" . "env" (fromYaml "FOO: true\nBAR: OK")) }}
+```
+
+or as a rendered template
+
+```go
+...
+{{- $env := fromYaml (include "container.env" .) -}}
+spec:
+  template:
+    spec:
+      containers:
+      - {{- include "hlib.container" (dict "context" . "env" $env) }}
+...
+
+{{- define "container.env" -}}
+FOO: true
+BAR: OK
+{{- end -}}
+```
+
+Combine pre-rendered `env` + `extraEnv`:
+
+```yaml
+container:
+  extraEnv:
+    LOG_LEVEL: debug
+```
+
+**Resource Tiers**
+
+Predefined resource profiles (avoids manual CPU/memory config):
+
+```yaml
+container:
+  resourceTier: "L"  # Options: S, M, L, XL, 2XL-5XL
+```
+
+| Resource Tier | Request Memory | Request CPU | Request Ephemeral Storage | Limit Memory | Limit CPU | Limit Ephemeral Storage |
+|---------------|----------------|-------------|---------------------------|--------------|-----------|-------------------------|
+| S             | 100Mi          | 100m        | 50Mi                      | 100Mi        | -         | 2Gi                     |
+| M             | 250Mi          | 250m        | 50Mi                      | 250Mi        | -         | 2Gi                     |
+| L             | 500Mi          | 500m        | 50Mi                      | 500Mi        | -         | 2Gi                     |
+| XL            | 1Gi            | 1           | 50Mi                      | 1Gi          | -         | 2Gi                     |
+| 2XL           | 2Gi            | 1           | 50Mi                      | 2Gi          | -         | 2Gi                     |
+| 3XL           | 4Gi            | 2           | 50Mi                      | 4Gi          | -         | 2Gi                     |
+| 4XL           | 8Gi            | 2           | 50Mi                      | 8Gi          | -         | 2Gi                     |
+| 5XL           | 16Gi           | 4           | 50Mi                      | 16Gi         | -         | 2Gi                     |
+
+Custom resources can be configured when `container.resourceTier` is not used.
+
+#### Advanced: Template Overrides
+
+The changes can only be added to the container base template via `override` parameter.
+For example, if it is needed to add a secret resource as input variables for container:
+
+```go
+{{- include "hlib.deployment" (dict "context" . "override" "app.deployment") -}}
+
+{{- define "app.deployment" -}}
+spec:
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print .Template.BasePath "/secret.yaml") $ | sha256sum }}
+    spec:
+      containers:
+      - {{- include "hlib.container" (dict "context" . "override" "app.deployment.container") }}
+{{- end -}}
+
+{{- define "app.deployment.container" -}}
+envFrom:
+  - secretRef:
+      name: {{ include "hlib.fullname" . }}
+{{- end -}}
+```
+
+### `hlib.deployment` template
+
+Creates Kubernetes Deployment manifest.
+By default, only one container is deployed due to the complexity of implementing multi-containerization.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/deployment.yaml`:
+
+```go
+{{- include "hlib.deployment" (dict "context" . "values" .Values.deployment) }}
+```
+
+Add the following values
+
+```yaml
+deployment:
+  container:
+    resourceTier: "S"
+    port: 8080
+    image:
+      repository: nginx
+```
+
+#### Configuration
+
+| Parameter      | Description                                                               | Required | Default              |
+|----------------|---------------------------------------------------------------------------|----------|----------------------|
+| `context`      | Root Helm context (usually `.`)                                           | Yes      | -                    |
+| `values`       | Deployment configuration values (from `values.yaml`)                      | No       | `.Values.deployment` |
+| `envTpl`       | Name of a template that generates environment variables in YAML format    | No       | -                    |
+| `dependencies` | Dictionary of dependent components (see below)                            | No       | -                    |
+| `override`     | Name of a template that overrides the basic one configured in the library | No       | -                    |
+
+**Dependency Integration**
+
+Used to override the configuration path of resources on which it depends.
+
+| Dependency       | Usage                                                | Default                  |
+|------------------|------------------------------------------------------|--------------------------|
+| `autoscaling`    | Auto-scaling status (disables replicas when enabled) | `.Values.autoscaling`    |
+| `serviceAccount` | Service account name injection                       | `.Values.serviceAccount` |
+
+```go
+{{- $dependencies := dict "autoscaling" .Values.newAutoscaling "serviceAccount" .Values.newServiceAccount -}}
+{{- include "hlib.deployment" (dict "context" . "dependencies" $dependencies) }}
+```
+
+**Environment Variables**
+
+Provide a template name to `envTpl` that outputs environment variables in valid YAML format:
+
+```go
+{{- include "hlib.deployment" (dict "context" . "envTpl" "your.env.template") }}
+```
+
+Example template (`templates/_env.yaml`):
+```go
+{{- define "your.env.template" -}}
+- name: ENV_VAR
+  value: "production"
+{{- end -}}
+
+# or use a simplified approach
+
+{{- define "your.env.template" -}}
+ENV_VAR: "production"
+{{- end -}}
+```
+
+#### Advanced: Template Overrides
+
+If there is no need to make any changes to the container,
+the changes can only be added to the deployment base template via `override` parameter as follows:
+
+```go
+{{- include "hlib.deployment" (dict "context" . "override" "app.deployment" "envTpl" "app.deployment.container.env") -}}
+
+{{- define "app.deployment" -}}
+spec:
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print .Template.BasePath "/secret.yaml") $ | sha256sum }}
+{{- end -}}
+
+{{- define "app.deployment.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+PASSWORD:
+  secretKeyRef:
+    {{ include "hlib.fullname" . }}: PASSWORD
+{{- end -}}
+```
+
+### `hlib.cronJob` template
+
+Creates Kubernetes CronJob manifest.
+By default, only one container is deployed due to the complexity of implementing multi-containerization.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/cron-job.yaml`:
+
+```go
+{{- include "hlib.cronJob" (dict "context" . "values" .Values.cronJob) }}
+```
+
+Add the following values
+
+```yaml
+cronJob:
+  schedule: "* * * * *"
+  container:
+    resourceTier: "S"
+    image:
+      repository: busybox
+```
+
+#### Configuration
+
+The basic template is created with some predefined non-default parameters:
+
+```yaml
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+```
+
+| Parameter      | Description                                                               | Required | Default           |
+|----------------|---------------------------------------------------------------------------|----------|-------------------|
+| `context`      | Root Helm context (usually `.`)                                           | Yes      | -                 |
+| `values`       | CronJob configuration values (from `values.yaml`)                         | No       | `.Values.cronJob` |
+| `envTpl`       | Name of a template that generates environment variables in YAML format    | No       | -                 |
+| `dependencies` | Dictionary of dependent components (see below)                            | No       | -                 |
+| `override`     | Name of a template that overrides the basic one configured in the library | No       | -                 |
+
+**Dependency Integration**
+
+Used to override the configuration path of resources on which it depends.
+
+| Dependency       | Usage                                                | Default                  |
+|------------------|------------------------------------------------------|--------------------------|
+| `serviceAccount` | Service account name injection                       | `.Values.serviceAccount` |
+
+```go
+{{- $dependencies := dict "serviceAccount" .Values.newServiceAccount -}}
+{{- include "hlib.cronJob" (dict "context" . "dependencies" $dependencies) }}
+```
+
+**Environment Variables**
+
+Provide a template name to `envTpl` that outputs environment variables in valid YAML format:
+
+```go
+{{- include "hlib.cronJob" (dict "context" . "envTpl" "your.env.template") }}
+```
+
+Example template (`templates/_env.yaml`):
+```go
+{{- define "your.env.template" -}}
+- name: ENV_VAR
+  value: "production"
+{{- end -}}
+
+# or use a simplified approach
+
+{{- define "your.env.template" -}}
+ENV_VAR: "production"
+{{- end -}}
+```
+
+#### Advanced: Template Overrides
+
+If there is no need to make any changes to the container,
+the changes can only be added to the CronJob base template via `override` parameter as follows:
+
+```go
+{{- include "hlib.cronJob" (dict "context" . "override" "app.cronJob" "envTpl" "app.cronJob.container.env") -}}
+
+{{- define "app.cronJob" -}}
+spec:
+  template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+{{- end -}}
+
+{{- define "app.cronJob.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+PASSWORD:
+  secretKeyRef:
+    {{ include "hlib.fullname" . }}: PASSWORD
+{{- end -}}
+```
+
+### `hlib.job` template
+
+Creates Kubernetes Job manifest.
+By default, only one container is deployed due to the complexity of implementing multi-containerization.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/job.yaml`:
+
+```go
+{{- include "hlib.job" (dict "context" . "values" .Values.job) }}
+```
+
+Add the following values
+
+```yaml
+job:
+  container:
+    resourceTier: "S"
+    port: 8080
+    image:
+      repository: nginx
+```
+
+#### Configuration
+
+The basic template is created with some predefined non-default parameters:
+
+```yaml
+spec:
+  # It is recommended to use this parameter for one-time jobs instead of a Helm hook
+  # that deletes the job immediately --> "helm.sh/hook-delete-policy": hook-succeeded
+  ttlSecondsAfterFinished: 3600  # Completed job will be deleted after 1 hour.
+  template:
+    spec:
+      restartPolicy: Never
+```
+
+| Parameter      | Description                                                               | Required | Default       |
+|----------------|---------------------------------------------------------------------------|----------|---------------|
+| `context`      | Root Helm context (usually `.`)                                           | Yes      | -             |
+| `values`       | Job configuration values (from `values.yaml`)                             | No       | `.Values.job` |
+| `envTpl`       | Name of a template that generates environment variables in YAML format    | No       | -             |
+| `dependencies` | Dictionary of dependent components (see below)                            | No       | -             |
+| `override`     | Name of a template that overrides the basic one configured in the library | No       | -             |
+
+**Dependency Integration**
+
+Used to override the configuration path of resources on which it depends.
+
+| Dependency       | Usage                                                | Default                  |
+|------------------|------------------------------------------------------|--------------------------|
+| `serviceAccount` | Service account name injection                       | `.Values.serviceAccount` |
+
+```go
+{{- $dependencies := dict "serviceAccount" .Values.newServiceAccount -}}
+{{- include "hlib.job" (dict "context" . "dependencies" $dependencies) }}
+```
+
+**Environment Variables**
+
+Provide a template name to `envTpl` that outputs environment variables in valid YAML format:
+
+```go
+{{- include "hlib.job" (dict "context" . "envTpl" "your.env.template") }}
+```
+
+Example template (`templates/_env.yaml`):
+```go
+{{- define "your.env.template" -}}
+- name: ENV_VAR
+  value: "production"
+{{- end -}}
+
+# or use a simplified approach
+
+{{- define "your.env.template" -}}
+ENV_VAR: "production"
+{{- end -}}
+```
+
+#### Advanced: Template Overrides
+
+If there is no need to make any changes to the container,
+the changes can only be added to the job base template via `override` parameter as follows:
+
+```go
+{{- include "hlib.job" (dict "context" . "override" "app.job" "envTpl" "app.job.container.env") -}}
+
+{{- define "app.job" -}}
+metadata:
+  name: {{ printf "%s-pre-deploy" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+
+{{- define "app.job.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+{{- end -}}
+```
+
+### `hlib.service` template
+
+Creates Kubernetes Service resources.
+
+By default, a service with type `ClusterIP` is created on port 80.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/service.yaml`:
+
+```go
+{{- include "hlib.service" (dict "context" .) }}
+```
+
+#### Configuration
+
+| Parameter  | Description                                                               | Required | Default           |
+|------------|---------------------------------------------------------------------------|----------|-------------------|
+| `context`  | Root Helm context (usually `.`)                                           | Yes      | -                 |
+| `values`   | Service configuration values (from `values.yaml`)                         | No       | `.Values.service` |
+| `override` | Name of a template that overrides the basic one configured in the library | No       | -                 |
+
+**Add additional ports for service**
+
+If necessary, additional ports can be added via a special variable `service.extraPorts`
+
+```yaml
+service:
+  extraPorts:
+    - name: debug-port
+      port: 5005
+      targetPort: 5005
+      protocol: TCP
+```
+
+#### Advanced: Template Overrides
+
+The changes can only be added to the base template via `override` parameter, e.g.:
+
+```go
+{{- include "hlib.service" (dict "context" . "override" "app.service") -}}
+
+{{- define "app.service" -}}
+spec:
+  ports:
+    - name: svc-tcp-port
+      port: 80
+      targetPort: cont-tcp-port
+      protocol: TCP
+    - name: admin-tcp-port
+      port: 8787
+      targetPort: 8787
+      protocol: TCP
+{{- end -}}
+```
+
+### `hlib.serviceAccount` template
+
+Creates Kubernetes ServiceAccount resources.
+
+> It is considered good practice to use non-default service accounts for all applications.
+> If the application does not need to communicate with the Kubernetes API,
+> then from a security point of view it is better to set the `automountServiceAccountToken` parameter to `false`.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/serviceaccount.yaml`:
+
+```go
+{{- include "hlib.serviceAccount" (dict "context" .) }}
+```
+
+#### Configuration
+
+| Parameter  | Description                                                               | Required | Default                  |
+|------------|---------------------------------------------------------------------------|----------|--------------------------|
+| `context`  | Root Helm context (usually `.`)                                           | Yes      | -                        |
+| `values`   | Service Account configuration values (from `values.yaml`)                 | No       | `.Values.serviceAccount` |
+| `override` | Name of a template that overrides the basic one configured in the library | No       | -                        |
+
+#### Advanced: Template Overrides
+
+The changes can only be added to the base template via `override` parameter, e.g.:
+
+```go
+{{- include "hlib.serviceAccount" (dict "context" . "override" "app.sa") -}}
+
+{{- define "app.sa" -}}
+imagePullSecrets:
+  - name: docker.tract-eng.com
+{{- end -}}
+```
+
+### `hlib.secret` template
+
+Creates Kubernetes Secret resources.
+
+It has several pre-defined annotations.
+
+```yaml
+annotations:
+  "helm.sh/hook": pre-install,pre-upgrade
+  "helm.sh/hook-weight": "1"
+```
+
+#### Basic Usage
+
+Include this template in your chart's `templates/secret.yaml`:
+
+```go
+{{- include "hlib.secret" (dict "context" .) }}
+```
+
+#### Configuration
+
+| Parameter  | Description                                                               | Required | Default          |
+|------------|---------------------------------------------------------------------------|----------|------------------|
+| `context`  | Root Helm context (usually `.`)                                           | Yes      | -                |
+| `values`   | Secret configuration values (from `values.yaml`)                          | No       | `.Values.secret` |
+| `override` | Name of a template that overrides the basic one configured in the library | No       | -                |
+
+#### Advanced: Template Overrides
+
+The changes can only be added to the base template via `override` parameter, e.g.:
+
+```go
+{{- include "hlib.secret" (dict "context" . "override" "app.secret") -}}
+
+{{- define "app.secret" -}}
+data:
+  PASSWORD: "P@ssvv0rd"
+{{- end -}}
+```
+
+### `hlib.configMap` template
+
+Creates Kubernetes ConfigMap resources.
+
+It has several pre-defined annotations.
+
+```yaml
+annotations:
+  "helm.sh/hook": pre-install,pre-upgrade
+  "helm.sh/hook-weight": "1"
+```
+
+#### Basic Usage
+
+Include this template in your chart's `templates/configmap.yaml`:
+
+```go
+{{- include "hlib.configMap" (dict "context" .) }}
+```
+
+#### Configuration
+
+| Parameter  | Description                                                               | Required | Default             |
+|------------|---------------------------------------------------------------------------|----------|---------------------|
+| `context`  | Root Helm context (usually `.`)                                           | Yes      | -                   |
+| `values`   | ConfigMap configuration values (from `values.yaml`)                       | No       | `.Values.configMap` |
+| `override` | Name of a template that overrides the basic one configured in the library | No       | -                   |
+
+#### Advanced: Template Overrides
+
+The changes can only be added to the base template via `override` parameter, e.g.:
+
+```go
+{{- include "hlib.configMap" (dict "context" . "override" "app.configMap") -}}
+
+{{- define "app.configMap" -}}
+data:
+  server.conf: |
+    port 1194
+    proto udp
+    dev tun
+    ca ca.crt
+    cert server.crt
+    key server.key
+    dh dh2048.pem
+    server 10.8.0.0 255.255.255.0
+{{- end -}}
+```
+
+### `hlib.ingress` template
+
+Creates Kubernetes Ingress manifest.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/ingress.yaml`:
+
+```go
+{{- include "hlib.ingress" (dict "context" .) }}
+```
+
+Add the following values
+
+```yaml
+ingress:
+  className: nginx-internal  # Controller-specific
+  tls:
+    - hosts:
+        - app.example.com
+      secretName: tls-cert  # Must exist in namespace
+  hosts:
+    - host: app.example.com
+      paths:
+        - path: /api
+          pathType: Prefix
+        - path: /static
+          pathType: Exact
+```
+
+#### Configuration
+
+| Parameter      | Description                                                               | Required | Default           |
+|----------------|---------------------------------------------------------------------------|----------|-------------------|
+| `context`      | Root Helm context (usually `.`)                                           | Yes      | -                 |
+| `values`       | Ingress configuration values (from `values.yaml`)                         | No       | `.Values.ingress` |
+| `dependencies` | Dictionary of dependent components (see below)                            | No       | -                 |
+| `override`     | Name of a template that overrides the basic one configured in the library | No       | -                 |
+
+**Dependency Integration**
+
+Used to override the configuration path of resources on which it depends.
+
+| Dependency | Usage                  | Default           |
+|------------|------------------------|-------------------|
+| `service`  | Service name injection | `.Values.service` |
+
+```go
+{{- $dependencies := dict "service" .Values.newService -}}
+{{- include "hlib.ingress" (dict "context" . "dependencies" $dependencies) }}
+```
+
+#### Advanced: Template Overrides
+
+If there is no need to make any changes to the container,
+the changes can only be added to the ingress base template via `override` parameter as follows:
+
+```go
+{{- include "hlib.ingress" (dict "context" . "override" "app.ingress") -}}
+
+{{- define "app.ingress" -}}
+metadata:
+  name: {{ printf "%s-ui" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+```
+
+### `hlib.hpa` template
+
+Creates Kubernetes HorizontalPodAutoscaler resources.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/hpa.yaml`:
+
+```go
+{{- include "hlib.hpa" (dict "context" .) }}
+```
+
+#### Configuration
+
+| Parameter      | Description                                                               | Required | Default               |
+|----------------|---------------------------------------------------------------------------|----------|-----------------------|
+| `context`      | Root Helm context (usually `.`)                                           | Yes      | -                     |
+| `values`       | Autoscaling configuration values (from `values.yaml`)                     | No       | `.Values.autoscaling` |
+| `dependencies` | Dictionary of dependent components (see below)                            | No       | -                     |
+| `override`     | Name of a template that overrides the basic one configured in the library | No       | -                     |
+
+**Dependency Integration**
+
+Used to override the configuration path of resources on which it depends.
+
+| Dependency   | Usage                | Default              |
+|--------------|----------------------|----------------------|
+| `deployment` | Deploymnet reference | `.Values.deployment` |
+
+```go
+{{- $dependencies := dict "deployment" .Values.newDeployment -}}
+{{- include "hlib.hpa" (dict "context" . "dependencies" $dependencies) }}
+```
+
+#### Advanced: Template Overrides
+
+The changes can only be added to the base template via `override` parameter, e.g.:
+
+```go
+{{- include "hlib.hpa" (dict "context" . "override" "app.hpa") -}}
+
+{{- define "app.hpa" -}}
+apiVersion: autoscaling/v1
+{{- end -}}
+```
+
+### `hlib.pdb` template
+
+Creates Kubernetes PodDisruptionBudget resources.
+
+By default, it is established that only `1` pod may be unavailable after the eviction starts.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/pdb.yaml`:
+
+```go
+{{- include "hlib.pdb" (dict "context" .) }}
+```
+
+#### Configuration
+
+| Parameter      | Description                                                               | Required | Default       |
+|----------------|---------------------------------------------------------------------------|----------|---------------|
+| `context`      | Root Helm context (usually `.`)                                           | Yes      | -             |
+| `values`       | Pod Disruption Budget configuration values (from `values.yaml`)           | No       | `.Values.pdb` |
+| `override`     | Name of a template that overrides the basic one configured in the library | No       | -             |
+
+#### Advanced: Template Overrides
+
+The changes can only be added to the base template via `override` parameter, e.g.:
+
+```go
+{{- include "hlib.pdb" (dict "context" . "override" "app.pdb") -}}
+
+{{- define "app.pdb" -}}
+spec:
+  selector:
+    matchExpressions:
+      - { key: environment, operator: In, values: [dev] }
+{{- end -}}
+```
+
+### `hlib.role` template
+
+Creates Kubernetes Role resources.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/role.yaml`:
+
+```go
+{{- include "hlib.role" (dict "context" .) }}
+```
+
+#### Configuration
+
+| Parameter  | Description                                                               | Required | Default             |
+|------------|---------------------------------------------------------------------------|----------|---------------------|
+| `context`  | Root Helm context (usually `.`)                                           | Yes      | -                   |
+| `values`   | Role configuration values (from `values.yaml`)                            | No       | `.Values.rbac.role` |
+| `override` | Name of a template that overrides the basic one configured in the library | No       | -                   |
+
+#### Advanced: Template Overrides
+
+The changes can only be added to the base template via `override` parameter, e.g.:
+
+```go
+{{- include "hlib.role" (dict "context" . "override" "app.role") -}}
+
+{{- define "app.role" -}}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "pods"]
+    verbs: ["get", "list"]
+{{- end -}}
+```
+
+### `hlib.roleBinding` template
+
+Creates Kubernetes roleBinding resources.
+By default, only one binding is created per service account.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/role-binding.yaml`:
+
+```go
+{{- include "hlib.roleBinding" (dict "context" .) }}
+```
+
+#### Configuration
+
+| Parameter      | Description                                                               | Required | Default                    |
+|----------------|---------------------------------------------------------------------------|----------|----------------------------|
+| `context`      | Root Helm context (usually `.`)                                           | Yes      | -                          |
+| `values`       | roleBinding configuration values (from `values.yaml`)                     | No       | `.Values.rbac.roleBinding` |
+| `dependencies` | Dictionary of dependent components (see below)                            | No       | -                          |
+| `override`     | Name of a template that overrides the basic one configured in the library | No       | -                          |
+
+**Dependency Integration**
+
+Used to override the configuration path of resources on which it depends.
+
+| Dependency       | Usage                     | Default                  |
+|------------------|---------------------------|--------------------------|
+| `role`           | Role reference            | `.Values.rbac.role`      |
+| `serviceAccount` | Service account reference | `.Values.serviceAccount` |
+
+```go
+{{- $dependencies := dict "role" .Values.newRole "serviceAccount" .Values.newServiceAccount -}}
+{{- include "hlib.deployment" (dict "context" . "dependencies" $dependencies) }}
+```
+
+#### Advanced: Template Overrides
+
+The changes can only be added to the base template via `override` parameter, e.g.:
+
+```go
+{{- include "hlib.roleBinding" (dict "context" . "override" "app.roleBinding") -}}
+
+{{- define "app.roleBinding" -}}
+metadata:
+  name: {{ printf "%s-rb" (include "hlib.name" $) | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+```
+
+### `hlib.clusterRole` template
+
+Creates Kubernetes ClusterRole resources.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/cluster-role.yaml`:
+
+```go
+{{- include "hlib.clusterRole" (dict "context" .) }}
+```
+
+#### Configuration
+
+| Parameter      | Description                                                               | Required | Default                    |
+|----------------|---------------------------------------------------------------------------|----------|----------------------------|
+| `context`      | Root Helm context (usually `.`)                                           | Yes      | -                          |
+| `values`       | ClusterRole configuration values (from `values.yaml`)                     | No       | `.Values.rbac.clusterRole` |
+| `override`     | Name of a template that overrides the basic one configured in the library | No       | -                          |
+
+**Role Aggregation**
+
+Combine existing ClusterRoles using label selectors, e.g.
+
+```yaml
+rbac:
+  clusterRole:
+    aggregationClusterRoleSelectors:
+      - matchLabels:
+          rbac.group/type: "monitoring"
+```
+
+#### Advanced: Template Overrides
+
+The changes can only be added to the base template via `override` parameter, e.g.:
+
+```go
+{{- include "hlib.clusterRole" (dict "context" . "override" "app.clusterRole") -}}
+
+{{- define "app.clusterRole" -}}
+rules:
+  - apiGroups: [""]
+    resources: ["endpoints", "pods", "nodes", "services"]
+    verbs: ["get", "list"]
+{{- end -}}
+```
+
+### `hlib.clusterRoleBinding` template
+
+Creates Kubernetes ClusterRoleBinding resources.
+By default, only one binding is created per service account.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/cluster-role-binding.yaml`:
+
+```go
+{{- include "hlib.clusterRoleBinding" (dict "context" .) }}
+```
+
+#### Configuration
+
+| Parameter      | Description                                                               | Required | Default                           |
+|----------------|---------------------------------------------------------------------------|----------|-----------------------------------|
+| `context`      | Root Helm context (usually `.`)                                           | Yes      | -                                 |
+| `values`       | ClusterRoleBinding configuration values (from `values.yaml`)              | No       | `.Values.rbac.clusterRoleBinding` |
+| `dependencies` | Dictionary of dependent components (see below)                            | No       | -                                 |
+| `override`     | Name of a template that overrides the basic one configured in the library | No       | -                                 |
+
+**Dependency Integration**
+
+Used to override the configuration path of resources on which it depends.
+
+| Dependency       | Usage                     | Default                    |
+|------------------|---------------------------|----------------------------|
+| `clusterRole`    | Cluster role reference    | `.Values.rbac.clusterRole` |
+| `serviceAccount` | Service account reference | `.Values.serviceAccount`   |
+
+```go
+{{- $dependencies := dict "clusterRole" .Values.newClusterRole "serviceAccount" .Values.newServiceAccount -}}
+{{- include "hlib.deployment" (dict "context" . "dependencies" $dependencies) }}
+```
+
+#### Advanced: Template Overrides
+
+The changes can only be added to the base template via `override` parameter, e.g.:
+
+```go
+{{- include "hlib.clusterRoleBinding" (dict "context" . "override" "app.clusterRoleBinding") -}}
+
+{{- define "app.clusterRoleBinding" -}}
+metadata:
+  name: {{ printf "%s-rb" (include "hlib.name" $) | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+```
+
+### `hlib.diagnostic` template
+
+Creates multiple Kubernetes resources that help developers provide extended access to the EKS cluster for debugging.
+
+#### Providing access
+
+Generate a kubeconfig with admin access and send it to the engineer who needs this access
+
+```shell
+# Get current context
+CLUSTER_NAME=$(kubectl config view --minify -o jsonpath='{.clusters[0].name}' | cut -d'/' -f2)
+CLUSTER_SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
+CLUSTER_CA=$(kubectl config view --raw --minify -o jsonpath='{.clusters[0].cluster.certificate-authority-data}')
+CLUSTER_NAMESPACE=<NAMESPACE_NAME>
+TOKEN=$(kubectl get secret <SECRET_NAME> -o jsonpath='{.data.token}' | base64 -d)
+
+cat <<EOF > debug-kubeconfig.yaml
+apiVersion: v1
+kind: Config
+clusters:
+- name: ${CLUSTER_NAME}
+  cluster:
+    server: ${CLUSTER_SERVER}
+    certificate-authority-data: ${CLUSTER_CA}
+contexts:
+- name: ${CLUSTER_NAME}-debug
+  context:
+    cluster: ${CLUSTER_NAME}
+    user: debug
+    namespace: ${CLUSTER_NAMESPACE}
+current-context: ${CLUSTER_NAME}-debug
+users:
+- name: debug
+  user:
+    token: ${TOKEN}
+EOF
+```
+
+Kubeconfig usage
+
+```shell
+export KUBECONFIG=debug-kubeconfig.yaml
+kubectl ...
+```
+
+> NOTE: This instruction may also appear when deploying an application with debug mode enabled.
+
+#### Default access permissions
+
+Namespace-scoped Role Permissions
+
+| API Group    | Resources                                                  | Verbs         | Purpose                                      |
+|--------------|------------------------------------------------------------|---------------|----------------------------------------------|
+| `""`         | `pods`, `pods/log`                                         | `get`, `list` | View pod details and logs                    |
+| `""`         | `pods/portforward`                                         | `create`      | Port-forward into pods                       |
+| `""`         | `events`, `configmaps`                                     | `get`, `list` | View events and ConfigMaps                   |
+| `apps`       | `replicasets`, `deployments`, `statefulsets`, `daemonsets` | `get`, `list` | Debug controllers managing workloads         |
+
+Cluster-scoped ClusterRole Permissions
+
+| API Group        | Resources                                                  | Verbs         | Purpose                                      |
+|------------------|------------------------------------------------------------|---------------|----------------------------------------------|
+| `""`             | `namespaces`                                               | `get`, `list` | Discover available namespaces                |
+| `""`             | `nodes`, `persistentvolumes`                               | `get`, `list` | Understand node states and volume bindings   |
+| `metrics.k8s.io` | `pods`                                                     | `get`, `list` | View pod-level resource usage metrics        |
+
+Additional permissions can be configured using the following variables:
+
+- `.Values.diagnosticMode.role.extraPermissionRules`
+- `.Values.diagnosticMode.clusterRole.extraPermissionRules`
+
+### `hlib.notes` templates
+
+Provides post-installation information for users, including access instructions and debug mode setup.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/_NOTES.txt`:
+
+```go
+{{- include "hlib.notes.chartInfo" (dict "context" .) }}
+
+{{- include "hlib.notes.releaseInfo" (dict "context" .) }}
+
+{{- include "hlib.notes.accessAppInfo" (dict "context" .) }}
+
+{{- if .Values.diagnosticMode.enabled }}
+{{- include "hlib.notes.diagnosticMode" (dict "context" .) }}
+{{- end }}
+```
+
+#### Chart Information
+
+```go
+{{- include "hlib.notes.chartInfo" (dict "context" .) }}
+```
+
+Output Example:
+
+```yaml
+CHART NAME: my-app
+CHART VERSION: 1.2.3
+APP VERSION: v4.5.0
+SOURCES:
+  - https://gitlab.com/my-org/my-app
+```
+
+#### Release Information
+
+```go
+{{- include "hlib.notes.releaseInfo" (dict "context" .) }}
+```
+
+Output Example:
+
+```yaml
+RELEASE NAME: my-app-dev
+NAMESPACE: production
+REVISION: 2
+```
+
+#### Application Access Instructions
+
+```go
+{{- include "hlib.notes.accessAppInfo" (dict "context" .) }}
+```
+
+Output Depends on Configuration:
+
+| Service Type  | 	Example Output                                             |
+|---------------|-------------------------------------------------------------|
+| Ingress       | Access application via Ingress: https://app.example.com/api |
+| NodePort	     | Provides kubectl commands to retrieve node IP and ports     |
+| LoadBalancer	 | Provides commands to get LB IP and port                     |
+| ClusterIP     | Provides port-forward command for local access              |
+
+#### Diagnostic Mode Setup
+
+```go
+{{- include "hlib.notes.diagnosticMode" (dict "context" .) }}
+```
+
+Output When Debug Enabled:
+
+```plaintext
+DEBUG MODE IS ENABLED
+
+Ask cluster admins to run these commands:
+# Get current context
+CLUSTER_NAME=...
+# Creates debug-kubeconfig.yaml with temporary access token
+```
+
+#### Customization Options
+
+Override Service/Ingress References
+
+```go
+{{- include "hlib.notes.accessAppInfo" (dict "context" . "service" .Values.customService "ingress" .Values.specialIngress) }}
+```
+
+## Values
+
+### Container
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| CONTROLLER.container.args | tpl/list | `[]` | Arguments to the command. |
+| CONTROLLER.container.command | tpl/list | `[]` | Command array to run in the container. |
+| CONTROLLER.container.extraEnv | tpl/list or tpl/object | [], {} | Additional environment variables to set in the container that can be represented in a list or dictionary format. |
+| CONTROLLER.container.extraPorts | tpl/list | `[]` | Additional ports for the container. |
+| CONTROLLER.container.image.digest | tpl/string | `""` | Container image digest that takes precedence over the tag. |
+| CONTROLLER.container.image.registry | tpl/string | `.Values.global.imageRegistry` | Container image registry. |
+| CONTROLLER.container.image.repository | tpl/string | `""` | Container image repository. |
+| CONTROLLER.container.image.tag | tpl/string | `""` | Container image tag. |
+| CONTROLLER.container.imagePullPolicy | tpl/string | `"Always"` | Image pull policy. |
+| CONTROLLER.container.lifecycle | tpl/object | `{}` | Lifecycle hooks configuration. |
+| CONTROLLER.container.livenessProbe | tpl/object | `{}` | Liveness probe configuration. |
+| CONTROLLER.container.name | tpl/string | `"app"` | Container name override. |
+| CONTROLLER.container.port | tpl/int | `nil` | Primary container port. |
+| CONTROLLER.container.readinessProbe | tpl/object | `{}` | Readiness probe configuration. |
+| CONTROLLER.container.resourceTier | tpl/string | `""` | Resource tier (S, M, L, XL, 2XL, 3XL, 4XL, 5XL). it takes precedence over the "container.resources". |
+| CONTROLLER.container.resources.limits.cpu | tpl/string | `""` | CPU limit for the container (optional). |
+| CONTROLLER.container.resources.limits.ephemeral-storage | tpl/string | `""` | Ephemeral storage limit for the container (optional). |
+| CONTROLLER.container.resources.limits.memory | tpl/string | `""` | Memory limit for the container. |
+| CONTROLLER.container.resources.requests.cpu | tpl/string | `""` | Requested CPU for the container. |
+| CONTROLLER.container.resources.requests.ephemeral-storage | tpl/string | `""` | Requested ephemeral storage (optional). |
+| CONTROLLER.container.resources.requests.memory | tpl/string | `""` | Requested memory for the container. |
+| CONTROLLER.container.securityContext | tpl/object | `{}` | Container security context. |
+| CONTROLLER.container.startupProbe | tpl/object | `{}` | Startup probe configuration. |
+| CONTROLLER.container.terminationMessagePath | tpl/string | `""` | Path to the termination message file. |
+| CONTROLLER.container.terminationMessagePolicy | tpl/string | `""` | Policy for termination message handling. |
+| CONTROLLER.container.workingDir | tpl/string | `""` | Working directory inside the container. |
+
+### HorizontalPodAutoscaler
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| autoscaling.annotations | tpl/object | `{}` | Annotations to add to the HPA resource. |
+| autoscaling.behavior | tpl/object | `{}` | HPA scaling behavior configuration. |
+| autoscaling.maxReplicas | tpl/int | `nil` | Maximum number of replicas. |
+| autoscaling.minReplicas | tpl/int | `nil` | Minimum number of replicas. |
+| autoscaling.name | tpl/string | Release fullname | Name of the HPA resource. |
+| autoscaling.targetCPUUtilizationPercentage | tpl/int | `nil` | Target average CPU utilization percentage. |
+| autoscaling.targetMemoryUtilizationPercentage | tpl/int | `nil` | Target average memory utilization percentage. |
+
+### ConfigMap
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| configMap.annotations | tpl/object | `{}` | Annotations to add to the ConfigMap metadata. |
+| configMap.immutable | tpl/bool | `nil` | ensures that data stored in the ConfigMap cannot be updated. |
+| configMap.name | tpl/string | Release fullname | Override the name of the ConfigMap. |
+
+### CronJob
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| cronjob.activeDeadlineSeconds | tpl/int | `nil` | Active deadline in seconds for a job. |
+| cronjob.affinity | tpl/object | `.Values.global.affinity` | Affinity settings. |
+| cronjob.backoffLimit | tpl/int | `nil` | Specifies the number of retries before marking this job failed. |
+| cronjob.completions | tpl/int | `nil` | Desired number of successfully finished pods the job should be run with. |
+| cronjob.concurrencyPolicy | tpl/string | `""` | Specifies how to treat concurrent executions of a Job. |
+| cronjob.failedJobsHistoryLimit | tpl/int | `nil` | The number of failed finished jobs to retain. |
+| cronjob.imagePullSecrets | tpl/list | `.Values.global.imagePullSecrets` | Image pull secrets for pod. |
+| cronjob.name | tpl/string | Release fullname | Name of the CronJob. |
+| cronjob.nodeSelector | tpl/object | `.Values.global.nodeSelector` | Node selector. |
+| cronjob.parallelism | tpl/int | `nil` | Maximum desired number of pods the job should run at any given time. |
+| cronjob.podAnnotations | tpl/object | `{}` | Pod annotations. |
+| cronjob.podDnsConfig | tpl/object | `{}` | DNS configuration for the pod. |
+| cronjob.podDnsPolicy | tpl/string | `""` | DNS policy for the pod. |
+| cronjob.podFailurePolicyRules | tpl/list | `[]` | Rules for handling pod failures. |
+| cronjob.podHostAliases | tpl/list | `[]` | An optional list of hosts and IPs that will be injected into the pod's hosts file if specified. |
+| cronjob.podHostNetwork | tpl/bool | `nil` | Enable host networking. |
+| cronjob.podHostname | tpl/string | `""` | Hostname of the pod. |
+| cronjob.podSecurityContext | tpl/object | `{}` | Pod security context. |
+| cronjob.podShareProcessNamespace | tpl/bool | `nil` | Share process namespace between containers. |
+| cronjob.priorityClassName | tpl/string | `""` | Priority class name. |
+| cronjob.restartPolicy | tpl/string | `"Never"` | Restart policy for containers. |
+| cronjob.runtimeClassName | tpl/string | `""` | Runtime class name. |
+| cronjob.schedule | tpl/string | `nil` | CronJob schedule in Cron format (required). |
+| cronjob.startingDeadlineSeconds | tpl/int | `nil` | Number of seconds after which the job is considered failed if it hasn’t started. |
+| cronjob.successfulJobsHistoryLimit | tpl/int | `nil` | The number of successful finished jobs to retain. |
+| cronjob.suspend | tpl/bool | `false` | Whether to suspend subsequent executions. |
+| cronjob.terminationGracePeriodSeconds | tpl/integer | `nil` | Termination grace period in seconds. |
+| cronjob.tolerations | tpl/list | `.Values.global.tolerations` | Tolerations. |
+| cronjob.topologySpreadConstraints | tpl/list | `[]` | Topology spread constraints. |
+| cronjob.ttlSecondsAfterFinished | tpl/int | `nil` | Time in seconds to retain the job after it finishes. It is recommended to use this parameter for one-time jobs instead of a Helm hook that deletes the job immediately --> "helm.sh/hook-delete-policy": hook-succeeded. |
+
+### Deployment
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| deployment.affinity | tpl/object | `.Values.global.affinity` | Affinity rules for pod scheduling. |
+| deployment.annotations | tpl/object | `{}` | Annotations to add to the deployment. |
+| deployment.imagePullSecrets | tpl/list | `.Values.global.imagePullSecrets` | Image pull secrets. |
+| deployment.minReadySeconds | tpl/int | `nil` | Minimum time in seconds for which a newly created pod should be ready. |
+| deployment.name | tpl/string | Release fullname | Name of the deployment. |
+| deployment.nodeSelector | tpl/object | `.Values.global.nodeSelector` | Node selector for pod assignment. |
+| deployment.podAnnotations | tpl/object | `{}` | Annotations to add to the deployment's pod template. |
+| deployment.podDnsConfig | tpl/object | `{}` | DNS configuration for pods. |
+| deployment.podDnsPolicy | tpl/string | `""` | DNS policy for pods. |
+| deployment.podHostAliases | tpl/list | `[]` | An optional list of hosts and IPs that will be injected into the pod's hosts file if specified. |
+| deployment.podHostNetwork | tpl/bool | `nil` | Use the host's network namespace. |
+| deployment.podHostname | tpl/string | `""` | Hostname of the pod. |
+| deployment.podSecurityContext | tpl/object | `{}` | Security context for the pod. |
+| deployment.podShareProcessNamespace | tpl/bool | `nil` | Enable process namespace sharing within pod. |
+| deployment.priorityClassName | tpl/string | `""` | Priority class name for the pod. |
+| deployment.replicaCount | tpl/int | `1` | Number of pod replicas (only if autoscaling is disabled). |
+| deployment.revisionHistoryLimit | tpl/int | `10` | Number of old ReplicaSets to retain for rollback. |
+| deployment.runtimeClassName | tpl/string | `""` | Runtime class name for the pod. |
+| deployment.terminationGracePeriodSeconds | tpl/int | `nil` | Duration in seconds the pod needs to terminate gracefully. |
+| deployment.tolerations | tpl/list | `.Values.global.tolerations` | Tolerations for pod scheduling. |
+| deployment.topologySpreadConstraints | tpl/list | `[]` | Topology spread constraints for pods. |
+| deployment.updateStrategy | tpl/object | `{}` | Strategy used to replace old Pods by new ones. |
+
+### Diagnostic Mode
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| diagnosticMode.clusterRole.extraPermissionRules | tpl/list | `[]` | Additional RBAC cluster-wide rules required for diagnostic workloads. |
+| diagnosticMode.role.extraPermissionRules | tpl/list | `[]` | Additional RBAC rules required for diagnostic workloads. |
+
+### Global
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| global.affinity | tpl/object | `{}` | Affinity rules to apply to all pods in all workloads. |
+| global.applicationPartOf | string | The name of the current chart | The name of a higher level application this one is part of. It will be added to `app.kubernetes.io/part-of`. It usually makes sense to change this for a chart with subcharts that use this Helm library. |
+| global.imagePullSecrets | tpl/list | `[]` | Image pull secrets for all containers. |
+| global.imageRegistry | tpl/string | `""` | Global container image registry override. |
+| global.nodeSelector | tpl/object | `{}` | Node selector to apply to all pods in all workloads. |
+| global.timezone | tpl/string | `""` | Default timezone to configure in containers, if applicable. |
+| global.tolerations | tpl/list | `[]` | Tolerations to apply to all pods in all workloads. |
+
+### Ingress
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| ingress.annotations | tpl/object | `{}` | Annotations to be added to the ingress. |
+| ingress.className | tpl/string | `""` | Ingress class name. |
+| ingress.hosts | tpl/list | `[]` | Hosts and paths rules. |
+| ingress.name | tpl/string | Release fullname | Name of the ingress resource. |
+| ingress.tls | tpl/list | [] | TLS configuration for ingress. |
+
+### Job
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| job.activeDeadlineSeconds | tpl/int | `nil` | Optional duration in seconds relative to the startTime that the job may be active before being terminated. |
+| job.affinity | tpl/object | `.Values.global.affinity` | Affinity rules for the Pod. |
+| job.annotations | tpl/object | `{}` | Metadata annotations for the Job. |
+| job.backoffLimit | tpl/int | `nil` | Number of retries before marking this job as failed. |
+| job.imagePullSecrets | tpl/list | `.Values.global.imagePullSecrets` | Pull secrets for job container image. |
+| job.name | tpl/string | Release fullname | Name of the Job. |
+| job.nodeSelector | tpl/object | `.Values.global.nodeSelector` | Node selector for the Pod. |
+| job.podAnnotations | tpl/object | `{}` | Annotations to add to the job Pod. |
+| job.podDnsConfig | tpl/object | `{}` | DNS config for the Pod. |
+| job.podDnsPolicy | tpl/string | `""` | DNS policy for the Pod. |
+| job.podHostAliases | tpl/list | `[]` | Host aliases for the Pod. |
+| job.podHostNetwork | tpl/bool | `nil` | Enable host network for the Pod. |
+| job.podHostname | tpl/string | `""` | Hostname for the Pod. |
+| job.podSecurityContext | tpl/object | `{}` | Security context for the Pod. |
+| job.podShareProcessNamespace | tpl/bool | `nil` | Share process namespace between containers. |
+| job.priorityClassName | tpl/string | `""` | Priority class name for the Pod. |
+| job.restartPolicy | tpl/string | `"Never"` | Restart policy for containers in the Pod (e.g., Never or OnFailure). |
+| job.runtimeClassName | tpl/string | `""` | Runtime class name for the Pod. |
+| job.terminationGracePeriodSeconds | tpl/int | `nil` | Duration the Pod needs to terminate gracefully. |
+| job.tolerations | tpl/list | `.Values.global.tolerations` | Tolerations for the Pod. |
+| job.topologySpreadConstraints | tpl/list | `[]` | Topology spread constraints for the Pod. |
+| job.ttlSecondsAfterFinished | tpl/int | `3600` | Seconds to retain the job after it finishes. |
+
+### PodDisruptionBudget
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| pdb.annotations | tpl/object | `{}` | Annotations to add to the PodDisruptionBudget resource. |
+| pdb.maxUnavailable | tpl/int | `1` | Number or percentage of pods that can be unavailable after eviction. Cannot be used with `minAvailable`. |
+| pdb.minAvailable | tpl/int | `nil` | Number or percentage of pods that must be available after eviction. Cannot be used with `maxUnavailable`. |
+| pdb.name | tpl/string | Release fullname | Name of the PodDisruptionBudget. |
+| pdb.unhealthyPodEvictionPolicy | tpl/string | `""` | Unhealthy pod eviction policy. Valid values: "AlwaysAllow", "IfHealthyBudget". |
+
+### ClusterRole
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| rbac.clusterRole.aggregationClusterRoleSelectors | tpl/list | `[]` | A list of label selector objects used to define aggregationRule.clusterRoleSelectors. |
+| rbac.clusterRole.annotations | tpl/object | `{}` | Annotations to add to the ClusterRole metadata. |
+| rbac.clusterRole.name | tpl/string | Release fullname | Override the name of the ClusterRole. |
+
+### ClusterRoleBinding
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| rbac.clusterRoleBinding.annotations | tpl/object | `{}` | Annotations to add to the ClusterRoleBinding metadata. |
+| rbac.clusterRoleBinding.name | tpl/string | Release fullname | Override the name of the ClusterRoleBinding. |
+
+### Role
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| rbac.role.annotations | tpl/object | `{}` | Annotations to add to the Role metadata. |
+| rbac.role.name | tpl/string | Release fullname | Override the name of the Role. |
+
+### RoleBinding
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| rbac.roleBinding.annotations | tpl/object | `{}` | Annotations to add to the RoleBinding metadata. |
+| rbac.roleBinding.name | tpl/string | Release fullname | Override the name of the RoleBinding. |
+
+### Secret
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| secret.annotations | tpl/object | `{}` | Annotations to add to the Secret metadata. `{"helm.sh/hook":"pre-install,pre-upgrade","helm.sh/hook-weight":"1"}` are already added. |
+| secret.immutable | tpl/bool | `nil` | ensures that data stored in the Secret cannot be updated. |
+| secret.name | tpl/string | Release fullname | Override the name of the Secret. |
+
+### Service
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| service.allocateLoadBalancerNodePorts | tpl/bool | `nil` | Allocate node ports for LoadBalancer-type Services. |
+| service.annotations | tpl/object | `{}` | Annotations to add to the Service metadata. |
+| service.clusterIP | tpl/string | `""` | ClusterIP address to assign to the Service. |
+| service.externalIPs | tpl/list | `[]` | List of external IP addresses. |
+| service.externalName | tpl/string | `""` | ExternalName for ExternalName-type Services. |
+| service.externalTrafficPolicy | tpl/string | `""` | External traffic policy (e.g., Local or Cluster). |
+| service.extraPorts | tpl/list | `[]` | Extra ports definitions to append to the Service. |
+| service.healthCheckNodePort | tpl/int | `nil` | Health check node port. This only applies when type is set to LoadBalancer and externalTrafficPolicy is set to Local. |
+| service.internalTrafficPolicy | tpl/string | `""` | Internal traffic policy. |
+| service.ipFamilies | tpl/list | `[]` | IP families. Valid values are "IPv4" and "IPv6". |
+| service.ipFamilyPolicy | tpl/string | `""` | IP family policy. |
+| service.loadBalancerClass | tpl/string | `""` | Class of the LoadBalancer implementation. |
+| service.loadBalancerIP | tpl/string | `""` | IP address for the LoadBalancer. |
+| service.loadBalancerSourceRanges | tpl/list | `[]` | List of CIDR ranges allowed to access the LoadBalancer. |
+| service.name | tpl/string | Release fullname | Override the name of the Service. |
+| service.nodePort | tpl/int | `nil` | NodePort to expose when using NodePort/LoadBalancer. |
+| service.port | tpl/int | `80` | Service port. |
+| service.sessionAffinity | tpl/string | `""` | Session affinity setting. Supports "ClientIP" and "None". |
+| service.sessionAffinityConfig | tpl/object | `{}` | Config for sessionAffinity. |
+| service.trafficDistribution | tpl/string | `""` | Traffic distribution strategy. |
+| service.type | tpl/string | `"ClusterIP"` | Service type. |
+
+### ServiceAccount
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| serviceAccount.annotations | tpl/object | `{}` | Annotations to add to the ServiceAccount metadata. |
+| serviceAccount.automountServiceAccountToken | tpl/bool | `nil` | Automatically mount the service account token. |
+| serviceAccount.name | tpl/string | Release fullname | Override the name of the ServiceAccount. |
+
+### Other Values
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| fullnameOverride | tpl/string | `""` | Override the chart full name. |
+| nameOverride | tpl/string | `""` | Override the chart full name from `{{ Release.Name }}-{{ .Chart.Name }}` to `{{ Release.Name }}-{{ .Values.nameOverride }}`. |
+
+## Contributions
+
+### Versioning rules
+
+Code version contains three positions `X.Y.Z`
+
+`Z` - should be increased **for fixes**
+
+`Y` - should be increased for code update with **adding new features**
+
+`X` - should be increased if update **breaks backward compatibility**
+
+### Documentation-related changes
+
+*README.md* files are generated using a [helm-docs](https://github.com/norwoodj/helm-docs/tree/master) utility.
+Don't try to add changes directly.
+
+```shell
+helm-docs --skip-version-footer
+```
+
+- Add documentation on variables to `values.yaml`
+- A new section should be added as a separate file to `.docs/`, and then linked into the template `README.md.gotmpl`.
+
