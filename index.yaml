@@ -1,3 +1,54 @@
 apiVersion: v1
-entries: {}
-generated: "2026-01-11T14:05:41.316316+02:00"
+entries:
+  hlib:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
+          description: Initial release of hlib Helm library chart
+        - kind: added
+          description: Support for Deployment, CronJob, Service, Ingress, and other Kubernetes resources
+        - kind: added
+          description: Comprehensive templating functions and helpers
+        - kind: added
+          description: ConfigMap and Secret management
+        - kind: added
+          description: RBAC support (Role, RoleBinding, ClusterRole, ClusterRoleBinding)
+        - kind: added
+          description: HPA and PDB support
+        - kind: added
+          description: Service Account management
+        - kind: added
+          description: Job templates with hooks support
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: GitHub Repository
+          url: https://github.com/anatolek/helm-charts
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    created: "2026-01-12T10:38:37.294435277Z"
+    description: Helm library chart for common Kubernetes templates
+    digest: 154eddaaaf0346eb8f6971a181dfd9854b0fb0c22d3e5088459d21876ae768a1
+    home: https://github.com/anatolek/helm-charts
+    icon: https://raw.githubusercontent.com/anatolek/helm-charts/main/charts/hlib/img/icon.png
+    keywords:
+    - helm
+    - library
+    - kubernetes
+    - templates
+    - deployment
+    - cronjob
+    - service
+    - ingress
+    kubeVersion: '>=1.32.0-0'
+    maintainers:
+    - email: anatolek@ukr.net
+      name: Anatolii Pedchenko
+    name: hlib
+    sources:
+    - https://github.com/anatolek/helm-charts
+    type: library
+    urls:
+    - https://github.com/anatolek/helm-charts/releases/download/hlib-0.0.1/hlib-0.0.1.tgz
+    version: 0.0.1
+generated: "2026-01-12T10:38:37.294441729Z"
