@@ -1,6 +1,8 @@
 name: Generate Helm documentation
+
 on:
   - pull_request
+
 jobs:
   generate:
     runs-on: ubuntu-latest
@@ -9,6 +11,7 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
+
       - name: Run helm-docs
         uses: losisin/helm-docs-github-action@v1
         with:

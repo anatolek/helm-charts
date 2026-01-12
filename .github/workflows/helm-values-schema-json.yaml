@@ -1,13 +1,16 @@
 name: Generate values schema json
+
 on:
   - pull_request
+
 jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
       - name: Generate values schema json
         uses: losisin/helm-values-schema-json-action@v2
         with:
