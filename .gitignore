@@ -2,7 +2,6 @@
 .idea/
 .idea_modules/
 *.iml
-.fleet/
 
 ### VisualStudioCode ###
 .vscode/*
@@ -27,9 +26,6 @@
 Thumbs.db
 
 ### Other ###
-*.backup
-*.log
 *.bak
 *.tmp
 .*.swp
-hlib-*.tgz
