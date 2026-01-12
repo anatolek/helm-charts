@@ -1,6 +1,6 @@
 # hlib
 
-![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: library](https://img.shields.io/badge/Type-library-informational?style=flat-square)
+![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square) ![Type: library](https://img.shields.io/badge/Type-library-informational?style=flat-square)
 
 A reusable Helm library chart that provides common Kubernetes template primitives for building consistent, maintainable charts across GT applications.
 This library eliminates code duplication by offering pre-built templates for standard Kubernetes resources including deployments, services, ingress, RBAC, jobs, and more. Charts using this library benefit from standardized configurations, predefined resource tiers, and consistent labeling patterns.

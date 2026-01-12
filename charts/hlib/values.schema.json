@@ -1,0 +1,799 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "CONTROLLER": {
+            "type": "object",
+            "properties": {
+                "container": {
+                    "type": "object",
+                    "properties": {
+                        "args": {
+                            "description": "Arguments to the command.",
+                            "type": "array"
+                        },
+                        "command": {
+                            "description": "Command array to run in the container.",
+                            "type": "array"
+                        },
+                        "extraEnv": {
+                            "description": "(tpl/list or tpl/object) Additional environment variables to set in the container that can be represented in a list or dictionary format.",
+                            "type": "null"
+                        },
+                        "extraPorts": {
+                            "description": "Additional ports for the container.",
+                            "type": "array"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "description": "Container image digest that takes precedence over the tag.",
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "description": "Container image registry.",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "description": "Container image repository.",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "description": "Container image tag.",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "imagePullPolicy": {
+                            "description": "Image pull policy.",
+                            "type": "string"
+                        },
+                        "lifecycle": {
+                            "description": "Lifecycle hooks configuration.",
+                            "type": "object"
+                        },
+                        "livenessProbe": {
+                            "description": "Liveness probe configuration.",
+                            "type": "object"
+                        },
+                        "name": {
+                            "description": "Container name override.",
+                            "type": "string"
+                        },
+                        "port": {
+                            "description": "Primary container port.",
+                            "type": "null"
+                        },
+                        "readinessProbe": {
+                            "description": "Readiness probe configuration.",
+                            "type": "object"
+                        },
+                        "resourceTier": {
+                            "description": "Resource tier (S, M, L, XL, 2XL, 3XL, 4XL, 5XL). it takes precedence over the \"container.resources\".",
+                            "type": "string"
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit for the container (optional).",
+                                            "type": "string"
+                                        },
+                                        "ephemeral-storage": {
+                                            "description": "Ephemeral storage limit for the container (optional).",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit for the container.",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "Requested CPU for the container.",
+                                            "type": "string"
+                                        },
+                                        "ephemeral-storage": {
+                                            "description": "Requested ephemeral storage (optional).",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Requested memory for the container.",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "securityContext": {
+                            "description": "Container security context.",
+                            "type": "object"
+                        },
+                        "startupProbe": {
+                            "description": "Startup probe configuration.",
+                            "type": "object"
+                        },
+                        "terminationMessagePath": {
+                            "description": "Path to the termination message file.",
+                            "type": "string"
+                        },
+                        "terminationMessagePolicy": {
+                            "description": "Policy for termination message handling.",
+                            "type": "string"
+                        },
+                        "workingDir": {
+                            "description": "Working directory inside the container.",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "autoscaling": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "description": "Annotations to add to the HPA resource.",
+                    "type": "object"
+                },
+                "behavior": {
+                    "description": "HPA scaling behavior configuration.",
+                    "type": "object"
+                },
+                "maxReplicas": {
+                    "description": "Maximum number of replicas.",
+                    "type": "null"
+                },
+                "minReplicas": {
+                    "description": "Minimum number of replicas.",
+                    "type": "null"
+                },
+                "name": {
+                    "description": "Name of the HPA resource.",
+                    "type": "string"
+                },
+                "targetCPUUtilizationPercentage": {
+                    "description": "Target average CPU utilization percentage.",
+                    "type": "null"
+                },
+                "targetMemoryUtilizationPercentage": {
+                    "description": "Target average memory utilization percentage.",
+                    "type": "null"
+                }
+            }
+        },
+        "configMap": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "description": "Annotations to add to the ConfigMap metadata.",
+                    "type": "object"
+                },
+                "immutable": {
+                    "description": "ensures that data stored in the ConfigMap cannot be updated.",
+                    "type": "null"
+                },
+                "name": {
+                    "description": "Override the name of the ConfigMap.",
+                    "type": "string"
+                }
+            }
+        },
+        "cronjob": {
+            "type": "object",
+            "properties": {
+                "activeDeadlineSeconds": {
+                    "description": "Active deadline in seconds for a job.",
+                    "type": "null"
+                },
+                "affinity": {
+                    "description": "Affinity settings.",
+                    "type": "object"
+                },
+                "backoffLimit": {
+                    "description": "Specifies the number of retries before marking this job failed.",
+                    "type": "null"
+                },
+                "completions": {
+                    "description": "Desired number of successfully finished pods the job should be run with.",
+                    "type": "null"
+                },
+                "concurrencyPolicy": {
+                    "description": "Specifies how to treat concurrent executions of a Job.",
+                    "type": "string"
+                },
+                "failedJobsHistoryLimit": {
+                    "description": "The number of failed finished jobs to retain.",
+                    "type": "null"
+                },
+                "imagePullSecrets": {
+                    "description": "Image pull secrets for pod.",
+                    "type": "array"
+                },
+                "name": {
+                    "description": "Name of the CronJob.",
+                    "type": "string"
+                },
+                "nodeSelector": {
+                    "description": "Node selector.",
+                    "type": "object"
+                },
+                "parallelism": {
+                    "description": "Maximum desired number of pods the job should run at any given time.",
+                    "type": "null"
+                },
+                "podAnnotations": {
+                    "description": "Pod annotations.",
+                    "type": "object"
+                },
+                "podDnsConfig": {
+                    "description": "DNS configuration for the pod.",
+                    "type": "object"
+                },
+                "podDnsPolicy": {
+                    "description": "DNS policy for the pod.",
+                    "type": "string"
+                },
+                "podFailurePolicyRules": {
+                    "description": "Rules for handling pod failures.",
+                    "type": "array"
+                },
+                "podHostAliases": {
+                    "description": "An optional list of hosts and IPs that will be injected into the pod's hosts file if specified.",
+                    "type": "array"
+                },
+                "podHostNetwork": {
+                    "description": "Enable host networking.",
+                    "type": "null"
+                },
+                "podHostname": {
+                    "description": "Hostname of the pod.",
+                    "type": "string"
+                },
+                "podSecurityContext": {
+                    "description": "Pod security context.",
+                    "type": "object"
+                },
+                "podShareProcessNamespace": {
+                    "description": "Share process namespace between containers.",
+                    "type": "null"
+                },
+                "priorityClassName": {
+                    "description": "Priority class name.",
+                    "type": "string"
+                },
+                "restartPolicy": {
+                    "description": "Restart policy for containers.",
+                    "type": "string"
+                },
+                "runtimeClassName": {
+                    "description": "Runtime class name.",
+                    "type": "string"
+                },
+                "schedule": {
+                    "description": "CronJob schedule in Cron format (required).",
+                    "type": "null"
+                },
+                "startingDeadlineSeconds": {
+                    "description": "Number of seconds after which the job is considered failed if it hasn’t started.",
+                    "type": "null"
+                },
+                "successfulJobsHistoryLimit": {
+                    "description": "The number of successful finished jobs to retain.",
+                    "type": "null"
+                },
+                "suspend": {
+                    "description": "Whether to suspend subsequent executions.",
+                    "type": "boolean"
+                },
+                "terminationGracePeriodSeconds": {
+                    "description": "Termination grace period in seconds.",
+                    "type": "null"
+                },
+                "tolerations": {
+                    "description": "Tolerations.",
+                    "type": "array"
+                },
+                "topologySpreadConstraints": {
+                    "description": "Topology spread constraints.",
+                    "type": "array"
+                },
+                "ttlSecondsAfterFinished": {
+                    "description": "Time in seconds to retain the job after it finishes. It is recommended to use this parameter for one-time jobs instead of a Helm hook",
+                    "type": "null"
+                }
+            }
+        },
+        "deployment": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "description": "Affinity rules for pod scheduling.",
+                    "type": "object"
+                },
+                "annotations": {
+                    "description": "Annotations to add to the deployment.",
+                    "type": "object"
+                },
+                "imagePullSecrets": {
+                    "description": "Image pull secrets.",
+                    "type": "array"
+                },
+                "minReadySeconds": {
+                    "description": "Minimum time in seconds for which a newly created pod should be ready.",
+                    "type": "null"
+                },
+                "name": {
+                    "description": "Name of the deployment.",
+                    "type": "string"
+                },
+                "nodeSelector": {
+                    "description": "Node selector for pod assignment.",
+                    "type": "object"
+                },
+                "podAnnotations": {
+                    "description": "Annotations to add to the deployment's pod template.",
+                    "type": "object"
+                },
+                "podDnsConfig": {
+                    "description": "DNS configuration for pods.",
+                    "type": "object"
+                },
+                "podDnsPolicy": {
+                    "description": "DNS policy for pods.",
+                    "type": "string"
+                },
+                "podHostAliases": {
+                    "description": "An optional list of hosts and IPs that will be injected into the pod's hosts file if specified.",
+                    "type": "array"
+                },
+                "podHostNetwork": {
+                    "description": "Use the host's network namespace.",
+                    "type": "null"
+                },
+                "podHostname": {
+                    "description": "Hostname of the pod.",
+                    "type": "string"
+                },
+                "podSecurityContext": {
+                    "description": "Security context for the pod.",
+                    "type": "object"
+                },
+                "podShareProcessNamespace": {
+                    "description": "Enable process namespace sharing within pod.",
+                    "type": "null"
+                },
+                "priorityClassName": {
+                    "description": "Priority class name for the pod.",
+                    "type": "string"
+                },
+                "replicaCount": {
+                    "description": "Number of pod replicas (only if autoscaling is disabled).",
+                    "type": "integer"
+                },
+                "revisionHistoryLimit": {
+                    "description": "Number of old ReplicaSets to retain for rollback.",
+                    "type": "integer"
+                },
+                "runtimeClassName": {
+                    "description": "Runtime class name for the pod.",
+                    "type": "string"
+                },
+                "terminationGracePeriodSeconds": {
+                    "description": "Duration in seconds the pod needs to terminate gracefully.",
+                    "type": "null"
+                },
+                "tolerations": {
+                    "description": "Tolerations for pod scheduling.",
+                    "type": "array"
+                },
+                "topologySpreadConstraints": {
+                    "description": "Topology spread constraints for pods.",
+                    "type": "array"
+                },
+                "updateStrategy": {
+                    "description": "Strategy used to replace old Pods by new ones.",
+                    "type": "object"
+                }
+            }
+        },
+        "diagnosticMode": {
+            "type": "object",
+            "properties": {
+                "clusterRole": {
+                    "type": "object",
+                    "properties": {
+                        "extraPermissionRules": {
+                            "description": "Additional RBAC cluster-wide rules required for diagnostic workloads.",
+                            "type": "array"
+                        }
+                    }
+                },
+                "role": {
+                    "type": "object",
+                    "properties": {
+                        "extraPermissionRules": {
+                            "description": "Additional RBAC rules required for diagnostic workloads.",
+                            "type": "array"
+                        }
+                    }
+                }
+            }
+        },
+        "fullnameOverride": {
+            "description": "Override the chart full name.",
+            "type": "string"
+        },
+        "global": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "description": "Affinity rules to apply to all pods in all workloads.",
+                    "type": "object"
+                },
+                "applicationPartOf": {
+                    "description": "The name of a higher level application this one is part of. It will be added to `app.kubernetes.io/part-of`. It usually makes sense to change this for a chart with subcharts that use this Helm library.",
+                    "type": "string"
+                },
+                "imagePullSecrets": {
+                    "description": "Image pull secrets for all containers.",
+                    "type": "array"
+                },
+                "imageRegistry": {
+                    "description": "Global container image registry override.",
+                    "type": "string"
+                },
+                "nodeSelector": {
+                    "description": "Node selector to apply to all pods in all workloads.",
+                    "type": "object"
+                },
+                "timezone": {
+                    "description": "Default timezone to configure in containers, if applicable.",
+                    "type": "string"
+                },
+                "tolerations": {
+                    "description": "Tolerations to apply to all pods in all workloads.",
+                    "type": "array"
+                }
+            }
+        },
+        "ingress": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "description": "Annotations to be added to the ingress.",
+                    "type": "object"
+                },
+                "className": {
+                    "description": "Ingress class name.",
+                    "type": "string"
+                },
+                "hosts": {
+                    "description": "Hosts and paths rules.",
+                    "type": "array"
+                },
+                "name": {
+                    "description": "Name of the ingress resource.",
+                    "type": "string"
+                },
+                "tls": {
+                    "description": "TLS configuration for ingress.",
+                    "type": "array"
+                }
+            }
+        },
+        "job": {
+            "type": "object",
+            "properties": {
+                "activeDeadlineSeconds": {
+                    "description": "Optional duration in seconds relative to the startTime that the job may be active before being terminated.",
+                    "type": "null"
+                },
+                "affinity": {
+                    "description": "Affinity rules for the Pod.",
+                    "type": "object"
+                },
+                "annotations": {
+                    "description": "Metadata annotations for the Job.",
+                    "type": "object"
+                },
+                "backoffLimit": {
+                    "description": "Number of retries before marking this job as failed.",
+                    "type": "null"
+                },
+                "imagePullSecrets": {
+                    "description": "Pull secrets for job container image.",
+                    "type": "array"
+                },
+                "name": {
+                    "description": "Name of the Job.",
+                    "type": "string"
+                },
+                "nodeSelector": {
+                    "description": "Node selector for the Pod.",
+                    "type": "object"
+                },
+                "podAnnotations": {
+                    "description": "Annotations to add to the job Pod.",
+                    "type": "object"
+                },
+                "podDnsConfig": {
+                    "description": "DNS config for the Pod.",
+                    "type": "object"
+                },
+                "podDnsPolicy": {
+                    "description": "DNS policy for the Pod.",
+                    "type": "string"
+                },
+                "podHostAliases": {
+                    "description": "Host aliases for the Pod.",
+                    "type": "array"
+                },
+                "podHostNetwork": {
+                    "description": "Enable host network for the Pod.",
+                    "type": "null"
+                },
+                "podHostname": {
+                    "description": "Hostname for the Pod.",
+                    "type": "string"
+                },
+                "podSecurityContext": {
+                    "description": "Security context for the Pod.",
+                    "type": "object"
+                },
+                "podShareProcessNamespace": {
+                    "description": "Share process namespace between containers.",
+                    "type": "null"
+                },
+                "priorityClassName": {
+                    "description": "Priority class name for the Pod.",
+                    "type": "string"
+                },
+                "restartPolicy": {
+                    "description": "Restart policy for containers in the Pod (e.g., Never or OnFailure).",
+                    "type": "string"
+                },
+                "runtimeClassName": {
+                    "description": "Runtime class name for the Pod.",
+                    "type": "string"
+                },
+                "terminationGracePeriodSeconds": {
+                    "description": "Duration the Pod needs to terminate gracefully.",
+                    "type": "null"
+                },
+                "tolerations": {
+                    "description": "Tolerations for the Pod.",
+                    "type": "array"
+                },
+                "topologySpreadConstraints": {
+                    "description": "Topology spread constraints for the Pod.",
+                    "type": "array"
+                },
+                "ttlSecondsAfterFinished": {
+                    "description": "Seconds to retain the job after it finishes.",
+                    "type": "integer"
+                }
+            }
+        },
+        "nameOverride": {
+            "description": "Override the chart full name from `{{ Release.Name }}-{{ .Chart.Name }}` to `{{ Release.Name }}-{{ .Values.nameOverride }}`.",
+            "type": "string"
+        },
+        "pdb": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "description": "Annotations to add to the PodDisruptionBudget resource.",
+                    "type": "object"
+                },
+                "maxUnavailable": {
+                    "description": "Number or percentage of pods that can be unavailable after eviction. Cannot be used with `minAvailable`.",
+                    "type": "integer"
+                },
+                "minAvailable": {
+                    "description": "Number or percentage of pods that must be available after eviction. Cannot be used with `maxUnavailable`.",
+                    "type": "null"
+                },
+                "name": {
+                    "description": "Name of the PodDisruptionBudget.",
+                    "type": "string"
+                },
+                "unhealthyPodEvictionPolicy": {
+                    "description": "Unhealthy pod eviction policy. Valid values: \"AlwaysAllow\", \"IfHealthyBudget\".",
+                    "type": "string"
+                }
+            }
+        },
+        "rbac": {
+            "type": "object",
+            "properties": {
+                "clusterRole": {
+                    "type": "object",
+                    "properties": {
+                        "aggregationClusterRoleSelectors": {
+                            "description": "A list of label selector objects used to define aggregationRule.clusterRoleSelectors.",
+                            "type": "array"
+                        },
+                        "annotations": {
+                            "description": "Annotations to add to the ClusterRole metadata.",
+                            "type": "object"
+                        },
+                        "name": {
+                            "description": "Override the name of the ClusterRole.",
+                            "type": "string"
+                        }
+                    }
+                },
+                "clusterRoleBinding": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "description": "Annotations to add to the ClusterRoleBinding metadata.",
+                            "type": "object"
+                        },
+                        "name": {
+                            "description": "Override the name of the ClusterRoleBinding.",
+                            "type": "string"
+                        }
+                    }
+                },
+                "role": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "description": "Annotations to add to the Role metadata.",
+                            "type": "object"
+                        },
+                        "name": {
+                            "description": "Override the name of the Role.",
+                            "type": "string"
+                        }
+                    }
+                },
+                "roleBinding": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "description": "Annotations to add to the RoleBinding metadata.",
+                            "type": "object"
+                        },
+                        "name": {
+                            "description": "Override the name of the RoleBinding.",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "secret": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "description": "Annotations to add to the Secret metadata. `{\"helm.sh/hook\":\"pre-install,pre-upgrade\",\"helm.sh/hook-weight\":\"1\"}` are already added.",
+                    "type": "object"
+                },
+                "immutable": {
+                    "description": "ensures that data stored in the Secret cannot be updated.",
+                    "type": "null"
+                },
+                "name": {
+                    "description": "Override the name of the Secret.",
+                    "type": "string"
+                }
+            }
+        },
+        "service": {
+            "type": "object",
+            "properties": {
+                "allocateLoadBalancerNodePorts": {
+                    "description": "Allocate node ports for LoadBalancer-type Services.",
+                    "type": "null"
+                },
+                "annotations": {
+                    "description": "Annotations to add to the Service metadata.",
+                    "type": "object"
+                },
+                "clusterIP": {
+                    "description": "ClusterIP address to assign to the Service.",
+                    "type": "string"
+                },
+                "externalIPs": {
+                    "description": "List of external IP addresses.",
+                    "type": "array"
+                },
+                "externalName": {
+                    "description": "ExternalName for ExternalName-type Services.",
+                    "type": "string"
+                },
+                "externalTrafficPolicy": {
+                    "description": "External traffic policy (e.g., Local or Cluster).",
+                    "type": "string"
+                },
+                "extraPorts": {
+                    "description": "Extra ports definitions to append to the Service.",
+                    "type": "array"
+                },
+                "healthCheckNodePort": {
+                    "description": "Health check node port. This only applies when type is set to LoadBalancer and externalTrafficPolicy is set to Local.",
+                    "type": "null"
+                },
+                "internalTrafficPolicy": {
+                    "description": "Internal traffic policy.",
+                    "type": "string"
+                },
+                "ipFamilies": {
+                    "description": "IP families. Valid values are \"IPv4\" and \"IPv6\".",
+                    "type": "array"
+                },
+                "ipFamilyPolicy": {
+                    "description": "IP family policy.",
+                    "type": "string"
+                },
+                "loadBalancerClass": {
+                    "description": "Class of the LoadBalancer implementation.",
+                    "type": "string"
+                },
+                "loadBalancerIP": {
+                    "description": "IP address for the LoadBalancer.",
+                    "type": "string"
+                },
+                "loadBalancerSourceRanges": {
+                    "description": "List of CIDR ranges allowed to access the LoadBalancer.",
+                    "type": "array"
+                },
+                "name": {
+                    "description": "Override the name of the Service.",
+                    "type": "string"
+                },
+                "nodePort": {
+                    "description": "NodePort to expose when using NodePort/LoadBalancer.",
+                    "type": "null"
+                },
+                "port": {
+                    "description": "Service port.",
+                    "type": "integer"
+                },
+                "sessionAffinity": {
+                    "description": "Session affinity setting. Supports \"ClientIP\" and \"None\".",
+                    "type": "string"
+                },
+                "sessionAffinityConfig": {
+                    "description": "Config for sessionAffinity.",
+                    "type": "object"
+                },
+                "trafficDistribution": {
+                    "description": "Traffic distribution strategy.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Service type.",
+                    "type": "string"
+                }
+            }
+        },
+        "serviceAccount": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "description": "Annotations to add to the ServiceAccount metadata.",
+                    "type": "object"
+                },
+                "automountServiceAccountToken": {
+                    "description": "Automatically mount the service account token.",
+                    "type": "null"
+                },
+                "name": {
+                    "description": "Override the name of the ServiceAccount.",
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
