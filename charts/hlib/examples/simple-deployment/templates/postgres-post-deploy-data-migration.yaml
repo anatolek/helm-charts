@@ -1,0 +1,24 @@
+{{- if .Values.simple.dbMigration.liquibaseAfterScripts.enabled }}
+{{- include "hlib.job" (dict "context" . "values" .Values.simple.dbMigration.liquibaseAfterScripts "override" "simple.liquibaseAfterScripts") -}}
+{{- end }}
+
+{{- define "simple.liquibaseAfterScripts" }}
+{{- $env := fromYaml (include "simple.liquibaseAfterScripts.container.env" .) -}}
+metadata:
+  name: {{ printf "%s-post-deploy-db-migration" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+  annotations:
+    "helm.sh/hook": post-install, post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      containers:
+      - {{- include "hlib.container" (dict "context" . "env" $env "values" .Values.simple.dbMigration.liquibaseAfterScripts.container "override" "simple.liquibaseAfterScripts.container") }}
+{{- end }}
+
+{{- define "simple.liquibaseAfterScripts.container" -}}
+envFrom:
+  - secretRef:
+      name: {{ include "hlib.fullname" $ }}
+{{- end -}}

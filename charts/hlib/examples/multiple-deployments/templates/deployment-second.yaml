@@ -1,0 +1,28 @@
+{{- include "hlib.deployment" (dict "context" . "override" "multi-depl.deploymentSecond" "values" .Values.deploymentSecond) -}}
+
+{{- define "multi-depl.deploymentSecond" -}}
+{{- $env := fromYaml (include "multi-depl.deployment.container.env" .) -}}
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ printf "%s-second" (include "hlib.name" $) | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: consumer
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ printf "%s-second" (include "hlib.name" $) | trunc 63 | trimSuffix "-" }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ printf "%s-second" (include "hlib.name" $) | trunc 63 | trimSuffix "-" }}
+      annotations:
+        checksum/secret: {{ include (print .Template.BasePath "/secret.yaml") $ | sha256sum }}
+    spec:
+      containers:
+      - {{- include "hlib.container" (dict "context" . "env" $env "override" "multi-depl.deploymentSecond.container" "values" .Values.deploymentSecond.container) }}
+{{- end -}}
+
+{{- define "multi-depl.deploymentSecond.container" -}}
+envFrom:
+  - secretRef:
+      name: {{ include "hlib.fullname" . }}
+{{- end -}}

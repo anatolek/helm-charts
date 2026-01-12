@@ -1,0 +1,95 @@
+diagnosticMode:
+  # -- Whether to enable diagnostic mode
+  enabled: false
+
+ingress:
+  # -- Whether to enable Ingress.
+  enabled: false
+
+autoscaling:
+  # -- Whether to enable Horizontal Pod Autoscaling.
+  enabled: false
+
+serviceAccount:
+  # -- Whether to enable Service Account.
+  enabled: false
+
+pdb:
+  # -- Whether to enable Pod Disruption Budget.
+  enabled: false
+
+# @ignored
+deployment:
+  container:
+    resourceTier: "S"
+    port: 8080
+    image:
+      repository: nginx
+    livenessProbe:
+      tcpSocket:
+        port: cont-tcp-port
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 6
+    readinessProbe:
+      tcpSocket:
+        port: cont-tcp-port
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      timeoutSeconds: 3
+      successThreshold: 1
+      failureThreshold: 3
+
+simple:
+  preProvision:
+    # -- Whether to run pre-install PostgreSQL provision.
+    # (create a new scheme, application credentials)
+    # @section -- Pre-Provision
+    enabled: false
+    # -- PostgreSQL pre-provision agent log level configuration.
+    # Valid values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE.
+    # @section -- Pre-Provision
+    logLevel: DEBUG
+    postgres:
+      # -- PostgreSQL admin username.
+      # @section -- Pre-Provision
+      username: postgres
+      # -- PostgreSQL admin user password.
+      # @section -- Pre-Provision
+      password: xxxxxxx
+    # @ignored
+    container:
+      resourceTier: "S"
+      image:
+        repository: posgresql-schema-bootstrap
+        tag: latest
+  dbMigration:
+      liquibaseBeforeScripts:
+        # -- Whether to run Before Liquibase script on the PostgreSQL.
+        # @section -- Database Migration
+        enabled: false
+        # @ignored
+        container:
+          resourceTier: "S"
+          image:
+            repository: database-migration
+      liquibaseAfterScripts:
+        # -- Whether to run After Liquibase script on the PostgreSQL.
+        # @section -- Database Migration
+        enabled: false
+        # @ignored
+        container:
+          resourceTier: "S"
+          image:
+            repository: database-migration
+  postgres:
+    # -- PostgreSQL URL.
+    # @section -- Simple Application
+    host: some.postgres.test.host
+    # -- PostgreSQL user password.
+    # @section -- Simple Application
+    password: "SuperSecretP@ssvv0rd"
+    # -- PostgreSQL username.
+    # @section -- Simple Application
+    username: simple

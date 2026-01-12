@@ -1,0 +1,13 @@
+# @ignored
+deployment:
+  container:
+    resourceTier: "S"
+    port: 8080
+    image:
+      repository: nginx
+
+vol:
+  # -- Encription key.
+  # It must be 32 bytes long.
+  # @section -- Vol Application
+  encryptionKey: 3xKCUpEFOfqDPoJcN22yaUYhUSs7S7SWQyzL74ZMGRo=

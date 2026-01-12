@@ -1,0 +1,104 @@
+{{- define "hlib.diagnostic" -}}
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ printf "%s-debug" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+  labels:
+    {{- include "hlib.labels" $ | nindent 4 }}
+    debug.gotransverse.com/purpose: troubleshooting
+    debug.gotransverse.com/modification-date: {{ now | date "2006-01-02" }}
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/portforward"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["events", "configmaps"]
+    verbs: ["get", "list"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets", "deployments", "statefulsets", "daemonsets"]
+    verbs: ["get", "list"]
+  {{- if (((.Values.diagnosticMode).role).extraPermissionRules) }}
+  {{- include "hlib.util.tplrender" (dict "value" .Values.diagnosticMode.extraPermissionRules "context" $) | nindent 2 }}
+  {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ printf "%s-debug" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+  labels:
+    {{- include "hlib.labels" $ | nindent 4 }}
+    debug.gotransverse.com/purpose: troubleshooting
+    debug.gotransverse.com/modification-date: {{ now | date "2006-01-02" }}
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["nodes", "persistentvolumes"]
+    verbs: ["get", "list"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  {{- if (((.Values.diagnosticMode).clusterRole).extraPermissionRules) }}
+  {{- include "hlib.util.tplrender" (dict "value" .Values.diagnosticMode.extraPermissionRules "context" $) | nindent 2 }}
+  {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ printf "%s-debug" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+  labels:
+    {{- include "hlib.labels" $ | nindent 4 }}
+    debug.gotransverse.com/purpose: troubleshooting
+    debug.gotransverse.com/modification-date: {{ now | date "2006-01-02" }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ printf "%s-debug" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+    namespace: {{ $.Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ printf "%s-debug" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ printf "%s-debug" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+  labels:
+    {{- include "hlib.labels" $ | nindent 4 }}
+    debug.gotransverse.com/purpose: troubleshooting
+    debug.gotransverse.com/modification-date: {{ now | date "2006-01-02" }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ printf "%s-debug" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+    namespace: {{ $.Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ printf "%s-debug" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ printf "%s-debug" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+  labels:
+    {{- include "hlib.labels" $ | nindent 4 }}
+    debug.gotransverse.com/purpose: troubleshooting
+    debug.gotransverse.com/modification-date: {{ now | date "2006-01-02" }}
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: {{ printf "%s-debug" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+  labels:
+    {{- include "hlib.labels" $ | nindent 4 }}
+    debug.gotransverse.com/purpose: troubleshooting
+    debug.gotransverse.com/modification-date: {{ now | date "2006-01-02" }}
+  annotations:
+    kubernetes.io/service-account.name: {{ printf "%s-debug" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+{{- end }}

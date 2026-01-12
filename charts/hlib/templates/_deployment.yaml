@@ -1,0 +1,102 @@
+{{- define "hlib.deployment.tpl" -}}
+{{- $ := .context -}}
+{{- $deploy := .values | default $.Values.deployment -}}
+{{- $env := dict -}}
+{{- if .envTpl }}
+  {{- $env = fromYaml (include .envTpl $) -}}
+{{- end }}
+{{- $autoscaling := ((.dependencies).autoscaling) | default $.Values.autoscaling -}}
+{{- $sa := ((.dependencies).serviceAccount) | default $.Values.serviceAccount -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hlib.util.tplrender" (dict "value" ($deploy.name | default (include "hlib.fullname" $)) "context" $) }}
+  labels: {{- include "hlib.labels" $ | nindent 4 }}
+  {{- if $deploy.annotations }}
+  annotations: {{- include "hlib.util.tplrender" (dict "value" $deploy.annotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not $autoscaling.enabled }}
+  replicas: {{ include "hlib.util.tplrender" (dict "value" ($deploy.replicaCount | default 1) "context" $) }}
+  {{- end }}
+  {{- if $deploy.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ include "hlib.util.tplrender" (dict "value" $deploy.revisionHistoryLimit "context" $) }}
+  {{- end }}
+  {{- if $deploy.minReadySeconds }}
+  minReadySeconds: {{ include "hlib.util.tplrender" (dict "value" $deploy.minReadySeconds "context" $) }}
+  {{- end }}
+  {{- if $deploy.updateStrategy }}
+  strategy: {{- include "hlib.util.tplrender" (dict "value" $deploy.updateStrategy "context" $) | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "hlib.selectorLabels" $ | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "hlib.selectorLabels" $ | nindent 8 }}
+      {{- if $deploy.podAnnotations }}
+      annotations: {{- include "hlib.util.tplrender" (dict "value" $deploy.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if $sa.enabled }}
+      serviceAccountName: {{ include "hlib.util.tplrender" (dict "value" ($sa.name | default (include "hlib.fullname" $)) "context" $) }}
+      {{- end }}
+      {{- if (($.Values.global).imagePullSecrets) | default $deploy.imagePullSecrets }}
+      imagePullSecrets: {{- include "hlib.util.tplrender" (dict "value" (($.Values.global).imagePullSecrets | default $deploy.imagePullSecrets) "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $deploy.podSecurityContext }}
+      securityContext: {{- include "hlib.util.tplrender" (dict "value" $deploy.podSecurityContext "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if (($.Values.global).nodeSelector) | default $deploy.nodeSelector }}
+      nodeSelector: {{- include "hlib.util.tplrender" (dict "value" (($.Values.global).nodeSelector | default $deploy.nodeSelector) "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if (($.Values.global).affinity) | default $deploy.affinity }}
+      affinity: {{- include "hlib.util.tplrender" (dict "value" (($.Values.global).affinity | default $deploy.affinity) "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if (($.Values.global).tolerations) | default $deploy.tolerations }}
+      tolerations: {{- include "hlib.util.tplrender" (dict "value" (($.Values.global).tolerations | default $deploy.tolerations) "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $deploy.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "hlib.util.tplrender" (dict "value" $deploy.topologySpreadConstraints "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $deploy.podDnsConfig }}
+      dnsConfig: {{- include "hlib.util.tplrender" (dict "value" $deploy.podDnsConfig "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $deploy.podDnsPolicy }}
+      dnsPolicy: {{ include "hlib.util.tplrender" (dict "value" $deploy.podDnsPolicy "context" $) }}
+      {{- end }}
+      {{- if $deploy.podHostNetwork }}
+      hostNetwork: {{ include "hlib.util.tplrender" (dict "value" $deploy.podHostNetwork "context" $) }}
+      {{- end }}
+      {{- if $deploy.podHostAliases }}
+      hostAliases: {{- include "hlib.util.tplrender" (dict "value" $deploy.podHostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $deploy.podHostname }}
+      hostname: {{ include "hlib.util.tplrender" (dict "value" $deploy.podHostname "context" $) }}
+      {{- end }}
+      {{- if $deploy.podShareProcessNamespace }}
+      shareProcessNamespace: {{ include "hlib.util.tplrender" (dict "value" $deploy.podShareProcessNamespace "context" $) }}
+      {{- end }}
+      {{- if $deploy.priorityClassName }}
+      priorityClassName: {{ include "hlib.util.tplrender" (dict "value" $deploy.priorityClassName "context" $) }}
+      {{- end }}
+      {{- if $deploy.runtimeClassName }}
+      runtimeClassName: {{ include "hlib.util.tplrender" (dict "value" $deploy.runtimeClassName "context" $) }}
+      {{- end }}
+      {{- if $deploy.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ include "hlib.util.tplrender" (dict "value" $deploy.terminationGracePeriodSeconds "context" $) }}
+      {{- end }}
+      volumes:
+      - name: temp-dir
+        emptyDir: {}
+      containers:
+      - {{- include "hlib.container" (dict "context" $ "values" $deploy.container "env" $env) }}
+{{- end }}
+
+{{- define "hlib.deployment" -}}
+{{- if .override }}
+{{- $_ := set . "base" "hlib.deployment.tpl" -}}
+{{- include "hlib.util.merge" . -}}
+{{- else }}
+{{- toYaml (fromYaml (include "hlib.deployment.tpl" .)) -}}
+{{- end -}}
+{{- end -}}

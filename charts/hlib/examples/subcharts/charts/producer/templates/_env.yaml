@@ -1,0 +1,5 @@
+{{- define "producer.deployment.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+POSTGRES_HOST: {{ .Values.app.postgres.host | default (((.Values.global).postgres).host) }}
+MODE: {{ .Values.app.mode }}
+{{- end -}}

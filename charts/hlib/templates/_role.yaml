@@ -1,0 +1,22 @@
+{{- define "hlib.role.tpl" -}}
+{{- $ := .context -}}
+{{- $role := .values | default (($.Values.rbac).role) -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "hlib.util.tplrender" (dict "value" ($role.name | default (include "hlib.fullname" $)) "context" $) }}
+  labels: {{- include "hlib.labels" $ | nindent 4 }}
+  {{- if $role.annotations }}
+  annotations: {{- include "hlib.util.tplrender" (dict "value" $role.annotations "context" $) | nindent 4 }}
+  {{- end }}
+rules: []
+{{- end }}
+
+{{- define "hlib.role" -}}
+{{- if .override }}
+{{- $_ := set . "base" "hlib.role.tpl" -}}
+{{- include "hlib.util.merge" . -}}
+{{- else }}
+{{- toYaml (fromYaml (include "hlib.role.tpl" .)) -}}
+{{- end -}}
+{{- end -}}

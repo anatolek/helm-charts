@@ -1,0 +1,3 @@
+{{- if .Values.rbac.enabled }}
+{{- include "hlib.clusterRoleBinding" (dict "context" .) -}}
+{{- end }}

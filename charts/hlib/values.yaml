@@ -1,0 +1,743 @@
+global:
+  # -- (tpl/object) Node selector to apply to all pods in all workloads.
+  # @section -- Global
+  nodeSelector: {}
+
+  # -- (tpl/list) Tolerations to apply to all pods in all workloads.
+  # @section -- Global
+  tolerations: []
+
+  # -- (tpl/object) Affinity rules to apply to all pods in all workloads.
+  # @section -- Global
+  affinity: {}
+
+  # -- (tpl/list) Image pull secrets for all containers.
+  # @section -- Global
+  imagePullSecrets: []
+
+  # -- (tpl/string) Global container image registry override.
+  # @section -- Global
+  imageRegistry: ""
+
+  # -- (tpl/string) Default timezone to configure in containers, if applicable.
+  # @section -- Global
+  timezone: ""
+
+  # -- The name of a higher level application this one is part of. It will be added to `app.kubernetes.io/part-of`.
+  # It usually makes sense to change this for a chart with subcharts that use this Helm library.
+  # @section -- Global
+  # @default -- The name of the current chart
+  applicationPartOf: ""
+
+diagnosticMode:
+  role:
+    # -- (tpl/list) Additional RBAC rules required for diagnostic workloads.
+    # @section -- Diagnostic Mode
+    extraPermissionRules: []
+  clusterRole:
+    # -- (tpl/list) Additional RBAC cluster-wide rules required for diagnostic workloads.
+    # @section -- Diagnostic Mode
+    extraPermissionRules: []
+
+# -- (tpl/string) Override the chart full name from `{{ Release.Name }}-{{ .Chart.Name }}` to `{{ Release.Name }}-{{ .Values.nameOverride }}`.
+nameOverride: ""
+
+# -- (tpl/string) Override the chart full name.
+fullnameOverride: ""
+
+rbac:
+  clusterRole:
+    # -- (tpl/string) Override the name of the ClusterRole.
+    # @section -- ClusterRole
+    # @default -- Release fullname
+    name: ""
+
+    # -- (tpl/object) Annotations to add to the ClusterRole metadata.
+    # @section -- ClusterRole
+    annotations: {}
+
+    # -- (tpl/list) A list of label selector objects used to define aggregationRule.clusterRoleSelectors.
+    # @section -- ClusterRole
+    aggregationClusterRoleSelectors: []
+    #   - matchLabels:
+    #       rbac.authorization.k8s.io/aggregate-to-admin: "true"
+
+  clusterRoleBinding:
+    # -- (tpl/string) Override the name of the ClusterRoleBinding.
+    # @section -- ClusterRoleBinding
+    # @default -- Release fullname
+    name: ""
+
+    # -- (tpl/object) Annotations to add to the ClusterRoleBinding metadata.
+    # @section -- ClusterRoleBinding
+    annotations: {}
+
+  role:
+    # -- (tpl/string) Override the name of the Role.
+    # @section -- Role
+    # @default -- Release fullname
+    name: ""
+
+    # -- (tpl/object) Annotations to add to the Role metadata.
+    # @section -- Role
+    annotations: {}
+
+  roleBinding:
+    # -- (tpl/string) Override the name of the RoleBinding.
+    # @section -- RoleBinding
+    # @default -- Release fullname
+    name: ""
+
+    # -- (tpl/object) Annotations to add to the RoleBinding metadata.
+    # @section -- RoleBinding
+    annotations: {}
+
+configMap:
+  # -- (tpl/string) Override the name of the ConfigMap.
+  # @section -- ConfigMap
+  # @default -- Release fullname
+  name: ""
+
+  # -- (tpl/object) Annotations to add to the ConfigMap metadata.
+  # @section -- ConfigMap
+  annotations: {}
+
+  # -- (tpl/bool) ensures that data stored in the ConfigMap cannot be updated.
+  # @section -- ConfigMap
+  immutable:
+
+CONTROLLER:
+  container:
+    # -- (tpl/string) Container name override.
+    # @section -- Container
+    name: "app"
+
+    image:
+      # -- (tpl/string) Container image registry.
+      # @section -- Container
+      # @default -- `.Values.global.imageRegistry`
+      registry: ""
+
+      # -- (tpl/string) Container image repository.
+      # @section -- Container
+      repository: ""
+
+      # -- (tpl/string) Container image tag.
+      # @section -- Container
+      tag: ""
+
+      # -- (tpl/string) Container image digest that takes precedence over the tag.
+      # @section -- Container
+      digest: ""
+
+    # -- (tpl/string) Image pull policy.
+    # @section -- Container
+    imagePullPolicy: "Always"
+
+    # -- (tpl/list or tpl/object) Additional environment variables to set in the container that can be represented in a list or dictionary format.
+    # @section -- Container
+    # @default -- [], {}
+    extraEnv:
+    # - name: FOO
+    #   value: BAR
+    ## OR
+    # FOO: BAR
+
+    # -- (tpl/list) Command array to run in the container.
+    # @section -- Container
+    command: []
+
+    # -- (tpl/list) Arguments to the command.
+    # @section -- Container
+    args: []
+
+    # -- (tpl/string) Working directory inside the container.
+    # @section -- Container
+    workingDir: ""
+
+    # -- (tpl/object) Container security context.
+    # @section -- Container
+    securityContext: {}
+
+    # -- (tpl/string) Resource tier (S, M, L, XL, 2XL, 3XL, 4XL, 5XL). it takes precedence over the "container.resources".
+    # @section -- Container
+    resourceTier: ""
+
+    resources:
+      requests:
+        # -- (tpl/string) Requested memory for the container.
+        # @section -- Container
+        memory: ""
+
+        # -- (tpl/string) Requested CPU for the container.
+        # @section -- Container
+        cpu: ""
+
+        # -- (tpl/string) Requested ephemeral storage (optional).
+        # @section -- Container
+        ephemeral-storage: ""
+
+      limits:
+        # -- (tpl/string) Memory limit for the container.
+        # @section -- Container
+        memory: ""
+
+        # -- (tpl/string) CPU limit for the container (optional).
+        # @section -- Container
+        cpu: ""
+
+        # -- (tpl/string) Ephemeral storage limit for the container (optional).
+        # @section -- Container
+        ephemeral-storage: ""
+
+    # -- (tpl/int) Primary container port.
+    # @section -- Container
+    port:
+
+    # -- (tpl/list) Additional ports for the container.
+    # @section -- Container
+    extraPorts: []
+    # - name: admin-tcp-port
+    #   containerPort: 8787
+    #   protocol: TCP
+
+    # -- (tpl/object) Startup probe configuration.
+    # @section -- Container
+    startupProbe: {}
+
+    # -- (tpl/object) Readiness probe configuration.
+    # @section -- Container
+    readinessProbe: {}
+
+    # -- (tpl/object) Liveness probe configuration.
+    # @section -- Container
+    livenessProbe: {}
+
+    # -- (tpl/object) Lifecycle hooks configuration.
+    # @section -- Container
+    lifecycle: {}
+
+    # -- (tpl/string) Path to the termination message file.
+    # @section -- Container
+    terminationMessagePath: ""
+
+    # -- (tpl/string) Policy for termination message handling.
+    # @section -- Container
+    terminationMessagePolicy: ""
+
+cronjob:
+  # -- (tpl/string) Name of the CronJob.
+  # @section -- CronJob
+  # @default -- Release fullname
+  name: ""
+
+  # -- (tpl/string) CronJob schedule in Cron format (required).
+  # @section -- CronJob
+  schedule:
+
+  # -- (tpl/int) Number of seconds after which the job is considered failed if it hasn’t started.
+  # @section -- CronJob
+  startingDeadlineSeconds:
+
+  # -- (tpl/string) Specifies how to treat concurrent executions of a Job.
+  # @section -- CronJob
+  concurrencyPolicy: ""
+
+  # -- (tpl/int) The number of successful finished jobs to retain.
+  # @section -- CronJob
+  successfulJobsHistoryLimit:
+
+  # -- (tpl/int) The number of failed finished jobs to retain.
+  # @section -- CronJob
+  failedJobsHistoryLimit:
+
+  # -- (tpl/bool) Whether to suspend subsequent executions.
+  # @section -- CronJob
+  suspend: false
+
+  # -- (tpl/int) Active deadline in seconds for a job.
+  # @section -- CronJob
+  activeDeadlineSeconds:
+
+  # -- (tpl/int) Specifies the number of retries before marking this job failed.
+  # @section -- CronJob
+  backoffLimit:
+
+  # -- (tpl/int) Desired number of successfully finished pods the job should be run with.
+  # @section -- CronJob
+  completions:
+
+  # -- (tpl/int) Maximum desired number of pods the job should run at any given time.
+  # @section -- CronJob
+  parallelism:
+
+  # -- (tpl/list) Rules for handling pod failures.
+  # @section -- CronJob
+  podFailurePolicyRules: []
+
+  # -- (tpl/int) Time in seconds to retain the job after it finishes.
+  # It is recommended to use this parameter for one-time jobs instead of a Helm hook
+  # that deletes the job immediately --> "helm.sh/hook-delete-policy": hook-succeeded.
+  # @section -- CronJob
+  ttlSecondsAfterFinished:
+
+  # -- (tpl/object) Pod annotations.
+  # @section -- CronJob
+  podAnnotations: {}
+
+  # -- (tpl/list) Image pull secrets for pod.
+  # @section -- CronJob
+  # @default -- `.Values.global.imagePullSecrets`
+  imagePullSecrets: []
+
+  # -- (tpl/object) Pod security context.
+  # @section -- CronJob
+  podSecurityContext: {}
+
+  # -- (tpl/object) Node selector.
+  # @section -- CronJob
+  # @default -- `.Values.global.nodeSelector`
+  nodeSelector: {}
+
+  # -- (tpl/object) Affinity settings.
+  # @section -- CronJob
+  # @default -- `.Values.global.affinity`
+  affinity: {}
+
+  # -- (tpl/list) Tolerations.
+  # @section -- CronJob
+  # @default -- `.Values.global.tolerations`
+  tolerations: []
+
+  # -- (tpl/list) Topology spread constraints.
+  # @section -- CronJob
+  topologySpreadConstraints: []
+
+  # -- (tpl/object) DNS configuration for the pod.
+  # @section -- CronJob
+  podDnsConfig: {}
+
+  # -- (tpl/string) DNS policy for the pod.
+  # @section -- CronJob
+  podDnsPolicy: ""
+
+  # -- (tpl/bool) Enable host networking.
+  # @section -- CronJob
+  podHostNetwork:
+
+  # -- (tpl/list) An optional list of hosts and IPs that will be injected into the pod's hosts file if specified.
+  # @section -- CronJob
+  podHostAliases: []
+
+  # -- (tpl/string) Hostname of the pod.
+  # @section -- CronJob
+  podHostname: ""
+
+  # -- (tpl/bool) Share process namespace between containers.
+  # @section -- CronJob
+  podShareProcessNamespace:
+
+  # -- (tpl/string) Priority class name.
+  # @section -- CronJob
+  priorityClassName: ""
+
+  # -- (tpl/string) Runtime class name.
+  # @section -- CronJob
+  runtimeClassName: ""
+
+  # -- (tpl/integer) Termination grace period in seconds.
+  # @section -- CronJob
+  terminationGracePeriodSeconds:
+
+  # -- (tpl/string) Restart policy for containers.
+  # @section -- CronJob
+  restartPolicy: Never
+
+deployment:
+  # -- (tpl/string) Name of the deployment.
+  # @section -- Deployment
+  # @default -- Release fullname
+  name: ""
+
+  # -- (tpl/int) Number of pod replicas (only if autoscaling is disabled).
+  # @section -- Deployment
+  replicaCount: 1
+
+  # -- (tpl/int) Number of old ReplicaSets to retain for rollback.
+  # @section -- Deployment
+  revisionHistoryLimit: 10
+
+  # -- (tpl/int) Minimum time in seconds for which a newly created pod should be ready.
+  # @section -- Deployment
+  minReadySeconds:
+
+  # -- (tpl/object) Strategy used to replace old Pods by new ones.
+  # @section -- Deployment
+  updateStrategy: {}
+
+  # -- (tpl/object) Annotations to add to the deployment.
+  # @section -- Deployment
+  annotations: {}
+
+  # -- (tpl/object) Annotations to add to the deployment's pod template.
+  # @section -- Deployment
+  podAnnotations: {}
+
+  # -- (tpl/object) Security context for the pod.
+  # @section -- Deployment
+  podSecurityContext: {}
+
+  # -- (tpl/object) Node selector for pod assignment.
+  # @section -- Deployment
+  # @default -- `.Values.global.nodeSelector`
+  nodeSelector: {}
+
+  # -- (tpl/object) Affinity rules for pod scheduling.
+  # @section -- Deployment
+  # @default -- `.Values.global.affinity`
+  affinity: {}
+
+  # -- (tpl/list) Tolerations for pod scheduling.
+  # @section -- Deployment
+  # @default -- `.Values.global.tolerations`
+  tolerations: []
+
+  # -- (tpl/list) Topology spread constraints for pods.
+  # @section -- Deployment
+  topologySpreadConstraints: []
+
+  # -- (tpl/object) DNS configuration for pods.
+  # @section -- Deployment
+  podDnsConfig: {}
+
+  # -- (tpl/string) DNS policy for pods.
+  # @section -- Deployment
+  podDnsPolicy: ""
+
+  # -- (tpl/bool) Use the host's network namespace.
+  # @section -- Deployment
+  podHostNetwork:
+
+  # -- (tpl/list) An optional list of hosts and IPs that will be injected into the pod's hosts file if specified.
+  # @section -- Deployment
+  podHostAliases: []
+
+  # -- (tpl/string) Hostname of the pod.
+  # @section -- Deployment
+  podHostname: ""
+
+  # -- (tpl/bool) Enable process namespace sharing within pod.
+  # @section -- Deployment
+  podShareProcessNamespace:
+
+  # -- (tpl/string) Priority class name for the pod.
+  # @section -- Deployment
+  priorityClassName: ""
+
+  # -- (tpl/string) Runtime class name for the pod.
+  # @section -- Deployment
+  runtimeClassName: ""
+
+  # -- (tpl/int) Duration in seconds the pod needs to terminate gracefully.
+  # @section -- Deployment
+  terminationGracePeriodSeconds:
+
+  # -- (tpl/list) Image pull secrets.
+  # @section -- Deployment
+  # @default -- `.Values.global.imagePullSecrets`
+  imagePullSecrets: []
+
+job:
+  # -- (tpl/string) Name of the Job.
+  # @section -- Job
+  # @default -- Release fullname
+  name: ""
+
+  # -- (tpl/object) Metadata annotations for the Job.
+  # @section -- Job
+  annotations: {}
+
+  # -- (tpl/int) Optional duration in seconds relative to the startTime that the job may be active before being terminated.
+  # @section -- Job
+  activeDeadlineSeconds:
+
+  # -- (tpl/int) Number of retries before marking this job as failed.
+  # @section -- Job
+  backoffLimit:
+
+  # -- (tpl/int) Seconds to retain the job after it finishes.
+  # @section -- Job
+  ttlSecondsAfterFinished: 3600
+
+  # -- (tpl/object) Annotations to add to the job Pod.
+  # @section -- Job
+  podAnnotations: {}
+
+  # -- (tpl/list) Pull secrets for job container image.
+  # @section -- Job
+  # @default -- `.Values.global.imagePullSecrets`
+  imagePullSecrets: []
+
+  # -- (tpl/object) Security context for the Pod.
+  # @section -- Job
+  podSecurityContext: {}
+
+  # -- (tpl/object) Node selector for the Pod.
+  # @section -- Job
+  # @default -- `.Values.global.nodeSelector`
+  nodeSelector: {}
+
+  # -- (tpl/object) Affinity rules for the Pod.
+  # @section -- Job
+  # @default -- `.Values.global.affinity`
+  affinity: {}
+
+  # -- (tpl/list) Tolerations for the Pod.
+  # @section -- Job
+  # @default -- `.Values.global.tolerations`
+  tolerations: []
+
+  # -- (tpl/list) Topology spread constraints for the Pod.
+  # @section -- Job
+  topologySpreadConstraints: []
+
+  # -- (tpl/object) DNS config for the Pod.
+  # @section -- Job
+  podDnsConfig: {}
+
+  # -- (tpl/string) DNS policy for the Pod.
+  # @section -- Job
+  podDnsPolicy: ""
+
+  # -- (tpl/bool) Enable host network for the Pod.
+  # @section -- Job
+  podHostNetwork:
+
+  # -- (tpl/list) Host aliases for the Pod.
+  # @section -- Job
+  podHostAliases: []
+
+  # -- (tpl/string) Hostname for the Pod.
+  # @section -- Job
+  podHostname: ""
+
+  # -- (tpl/bool) Share process namespace between containers.
+  # @section -- Job
+  podShareProcessNamespace:
+
+  # -- (tpl/string) Priority class name for the Pod.
+  # @section -- Job
+  priorityClassName: ""
+
+  # -- (tpl/string) Runtime class name for the Pod.
+  # @section -- Job
+  runtimeClassName: ""
+
+  # -- (tpl/int) Duration the Pod needs to terminate gracefully.
+  # @section -- Job
+  terminationGracePeriodSeconds:
+
+  # -- (tpl/string) Restart policy for containers in the Pod (e.g., Never or OnFailure).
+  # @section -- Job
+  restartPolicy: Never
+
+autoscaling:
+  # -- (tpl/string) Name of the HPA resource.
+  # @section -- HorizontalPodAutoscaler
+  # @default -- Release fullname
+  name: ""
+
+  # -- (tpl/object) Annotations to add to the HPA resource.
+  # @section -- HorizontalPodAutoscaler
+  annotations: {}
+
+  # -- (tpl/int) Minimum number of replicas.
+  # @section -- HorizontalPodAutoscaler
+  minReplicas:
+
+  # -- (tpl/int) Maximum number of replicas.
+  # @section -- HorizontalPodAutoscaler
+  maxReplicas:
+
+  # -- (tpl/int) Target average CPU utilization percentage.
+  # @section -- HorizontalPodAutoscaler
+  targetCPUUtilizationPercentage:
+
+  # -- (tpl/int) Target average memory utilization percentage.
+  # @section -- HorizontalPodAutoscaler
+  targetMemoryUtilizationPercentage:
+
+  # -- (tpl/object) HPA scaling behavior configuration.
+  # @section -- HorizontalPodAutoscaler
+  behavior: {}
+
+ingress:
+  # -- (tpl/string) Name of the ingress resource.
+  # @section -- Ingress
+  # @default -- Release fullname
+  name: ""
+
+  # -- (tpl/object) Annotations to be added to the ingress.
+  # @section -- Ingress
+  annotations: {}
+
+  # -- (tpl/string) Ingress class name.
+  # @section -- Ingress
+  className: ""
+
+  # -- (tpl/list) TLS configuration for ingress.
+  # @section -- Ingress
+  # @default -- []
+  tls: []
+  #   - hosts:
+  #       - example.com
+  #     secretName: tls-secret
+
+  # -- (tpl/list) Hosts and paths rules.
+  # @section -- Ingress
+  hosts: []
+  #   - host: example.com
+  #     paths:
+  #       - path: /
+  #         pathType: Prefix
+
+pdb:
+  # -- (tpl/string) Name of the PodDisruptionBudget.
+  # @section -- PodDisruptionBudget
+  # @default -- Release fullname
+  name: ""
+
+  # -- (tpl/object) Annotations to add to the PodDisruptionBudget resource.
+  # @section -- PodDisruptionBudget
+  annotations: {}
+
+  # -- (tpl/int) Number or percentage of pods that must be available after eviction. Cannot be used with `maxUnavailable`.
+  # @section -- PodDisruptionBudget
+  minAvailable:
+
+  # -- (tpl/int) Number or percentage of pods that can be unavailable after eviction. Cannot be used with `minAvailable`.
+  # @section -- PodDisruptionBudget
+  maxUnavailable: 1
+
+  # -- (tpl/string) Unhealthy pod eviction policy. Valid values: "AlwaysAllow", "IfHealthyBudget".
+  # @section -- PodDisruptionBudget
+  unhealthyPodEvictionPolicy: ""
+
+secret:
+  # -- (tpl/string) Override the name of the Secret.
+  # @section -- Secret
+  # @default -- Release fullname
+  name: ""
+
+  # -- (tpl/object) Annotations to add to the Secret metadata. `{"helm.sh/hook":"pre-install,pre-upgrade","helm.sh/hook-weight":"1"}` are already added.
+  # @section -- Secret
+  annotations: {}
+
+  # -- (tpl/bool) ensures that data stored in the Secret cannot be updated.
+  # @section -- Secret
+  immutable:
+
+service:
+  # -- (tpl/string) Override the name of the Service.
+  # @section -- Service
+  # @default -- Release fullname
+  name: ""
+
+  # -- (tpl/object) Annotations to add to the Service metadata.
+  # @section -- Service
+  annotations: {}
+
+  # -- (tpl/string) Service type.
+  # @section -- Service
+  type: "ClusterIP"
+
+  # -- (tpl/string) ClusterIP address to assign to the Service.
+  # @section -- Service
+  clusterIP: ""
+
+  # -- (tpl/string) ExternalName for ExternalName-type Services.
+  # @section -- Service
+  externalName: ""
+
+  # -- (tpl/list) List of external IP addresses.
+  # @section -- Service
+  externalIPs: []
+
+  # -- (tpl/bool) Allocate node ports for LoadBalancer-type Services.
+  # @section -- Service
+  allocateLoadBalancerNodePorts:
+
+  # -- (tpl/string) IP address for the LoadBalancer.
+  # @section -- Service
+  loadBalancerIP: ""
+
+  # -- (tpl/list) List of CIDR ranges allowed to access the LoadBalancer.
+  # @section -- Service
+  loadBalancerSourceRanges: []
+
+  # -- (tpl/string) Class of the LoadBalancer implementation.
+  # @section -- Service
+  loadBalancerClass: ""
+
+  # -- (tpl/string) External traffic policy (e.g., Local or Cluster).
+  # @section -- Service
+  externalTrafficPolicy: ""
+
+  # -- (tpl/string) Session affinity setting. Supports "ClientIP" and "None".
+  # @section -- Service
+  sessionAffinity: ""
+
+  # -- (tpl/object) Config for sessionAffinity.
+  # @section -- Service
+  sessionAffinityConfig: {}
+
+  # -- (tpl/int) NodePort to expose when using NodePort/LoadBalancer.
+  # @section -- Service
+  nodePort:
+
+  # -- (tpl/int) Service port.
+  # @section -- Service
+  port: 80
+
+  # -- (tpl/list) Extra ports definitions to append to the Service.
+  # @section -- Service
+  extraPorts: []
+  # - name: service-port
+  #   protocol: TCP
+  #   port: 8080
+  #   targetPort: container-admin-port
+  #   appProtocol: http
+
+  # -- (tpl/int) Health check node port. This only applies when type is set to LoadBalancer and externalTrafficPolicy is set to Local.
+  # @section -- Service
+  healthCheckNodePort:
+
+  # -- (tpl/string) IP family policy.
+  # @section -- Service
+  ipFamilyPolicy: ""
+
+  # -- (tpl/list) IP families. Valid values are "IPv4" and "IPv6".
+  # @section -- Service
+  ipFamilies: []
+
+  # -- (tpl/string) Internal traffic policy.
+  # @section -- Service
+  internalTrafficPolicy: ""
+
+  # -- (tpl/string) Traffic distribution strategy.
+  # @section -- Service
+  trafficDistribution: ""
+
+serviceAccount:
+  # -- (tpl/string) Override the name of the ServiceAccount.
+  # @section -- ServiceAccount
+  # @default -- Release fullname
+  name: ""
+
+  # -- (tpl/object) Annotations to add to the ServiceAccount metadata.
+  # @section -- ServiceAccount
+  annotations: {}
+
+  # -- (tpl/bool) Automatically mount the service account token.
+  # @section -- ServiceAccount
+  automountServiceAccountToken:

@@ -1,0 +1,27 @@
+{{- define "hlib.configMap.tpl" -}}
+{{- $ := .context -}}
+{{- $cm := .values | default $.Values.configMap -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hlib.util.tplrender" (dict "value" ($cm.name | default (include "hlib.fullname" $)) "context" $) }}
+  labels: {{- include "hlib.labels" $ | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "1"
+  {{- if $cm.annotations }}
+  {{- include "hlib.util.tplrender" (dict "value" $cm.annotations "context" $) | nindent 4 }}
+  {{- end }}
+{{- if hasKey $cm "immutable" }}
+immutable: {{ include "hlib.util.tplrender" (dict "value" $cm.immutable "context" $) }}
+{{- end }}
+{{- end }}
+
+{{- define "hlib.configMap" -}}
+{{- if .override }}
+{{- $_ := set . "base" "hlib.configMap.tpl" -}}
+{{- include "hlib.util.merge" . -}}
+{{- else }}
+{{- toYaml (fromYaml (include "hlib.configMap.tpl" .)) -}}
+{{- end -}}
+{{- end -}}

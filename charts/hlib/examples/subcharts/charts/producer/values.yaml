@@ -1,0 +1,25 @@
+serviceAccount:
+  # -- Whether to enable Service Account.
+  enabled: false
+
+# @ignored
+deployment:
+  container:
+    resourceTier: "S"
+    image:
+      repository: busybox
+
+app:
+  # -- Application mode.
+  # @section -- Producer Application
+  mode: producer
+  postgres:
+    # -- PostgreSQL URL.
+    # @section -- Producer Application
+    host: ""
+    # -- PostgreSQL user password.
+    # @section -- Producer Application
+    password: ""
+    # -- PostgreSQL user name.
+    # @section -- Producer Application
+    username: ""

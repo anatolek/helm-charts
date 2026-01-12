@@ -1,0 +1,22 @@
+{{- define "simple.deployment.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+POSTGRES_HOST: {{ .Values.simple.postgres.host }}
+{{- end -}}
+
+{{- define "simple.preProvision.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+POSTGRES_HOST: {{ .Values.simple.postgres.host }}
+LOG_LEVEL:  {{ .Values.simple.preProvision.logLevel }}
+{{- end -}}
+
+{{- define "simple.liquibaseBeforeScripts.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+POSTGRES_HOST: {{ .Values.simple.postgres.host }}
+RUN_BEFORE: true
+{{- end -}}
+
+{{- define "simple.liquibaseAfterScripts.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+POSTGRES_HOST: {{ .Values.simple.postgres.host }}
+RUN_AFTER: true
+{{- end -}}

@@ -1,0 +1,4 @@
+{{- define "cronj.cronJob.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+POSTGRES_HOST: {{ .Values.cronj.postgres.host }}
+{{- end -}}

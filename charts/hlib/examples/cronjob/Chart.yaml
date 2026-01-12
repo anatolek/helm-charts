@@ -1,0 +1,13 @@
+apiVersion: v2
+appVersion: "1.37"
+description: A Helm chart for deploying CronJ application
+keywords:
+- cronj
+name: cronj
+type: application
+version: "1.37"
+icon: https://raw.githubusercontent.com/anatolek/hlib/master/img/icon.png
+dependencies:
+- name: hlib
+  version: ">= 0.0.0"
+  repository: https://github.com/anatolek/hlib

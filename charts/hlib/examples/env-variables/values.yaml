@@ -1,0 +1,35 @@
+# @ignored
+deployment:
+  container:
+    resourceTier: "S"
+    port: 8080
+    image:
+      repository: nginx
+
+envVars:
+  # -- Pseudo boolean value (string "yes", "no", "off", "on").
+  # It must be quoted additionally in the config files. Otherwise it will be rendered as a boolean value (true/false).
+  # @section -- envVars Application
+  pseudoBoolean: "yes" 
+  jwt:
+    # -- Whether to validate JWT token.
+    # @section -- envVars Application
+    enabled: false
+    # -- JWT token secret.
+    # @section -- envVars Application
+    secret: some.jwt.test.secret
+  postgres:
+    # -- PostgreSQL URL.
+    # @section -- envVars Application
+    host: some.postgres.test.host
+    # -- PostgreSQL user password.
+    # @section -- envVars Application
+    password: "SuperSecretP@ssvv0rd"
+    # -- PostgreSQL user name.
+    # @section -- envVars Application
+    username: envVars
+  kafka:
+    producer:
+      # -- Spring Boot Kafka producer properties.
+      # @section -- envVars Application
+      properties: max.poll.interval.ms=300000;session.timeout.ms=60000;heartbeat.interval.ms=3000

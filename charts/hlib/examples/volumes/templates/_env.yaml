@@ -1,0 +1,4 @@
+{{- define "vol.deployment.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+COOL: true
+{{- end -}}

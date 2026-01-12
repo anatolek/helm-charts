@@ -1,0 +1,4 @@
+{{- define "multi-depl.deployment.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+POSTGRES_HOST: {{ .Values.multiDepl.postgres.host }}
+{{- end -}}

@@ -1,0 +1,85 @@
+{{- define "hlib.service.tpl" -}}
+{{- $ := .context -}}
+{{- $svc := .values | default $.Values.service -}}
+{{- $requiredMsg := include "hlib.default-check-required-msg" $ -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hlib.util.tplrender" (dict "value" ($svc.name | default (include "hlib.fullname" $)) "context" $) }}
+  labels: {{- include "hlib.labels" $ | nindent 4 }}
+  {{- if $svc.annotations }}
+  annotations: {{- include "hlib.util.tplrender" (dict "value" $svc.annotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ include "hlib.util.tplrender" (dict "value" ($svc.type | default "ClusterIP") "context" $) }}
+  {{- if ne $svc.type "ExternalName" }}
+  selector: {{- include "hlib.selectorLabels" $ | nindent 4 }}
+  {{- end }}
+  {{- if $svc.clusterIP }}
+  clusterIP: {{ include "hlib.util.tplrender" (dict "value" $svc.clusterIP "context" $) }}
+  {{- end }}
+  {{- if $svc.externalName }}
+  externalName: {{ include "hlib.util.tplrender" (dict "value" $svc.externalName "context" $) }}
+  {{- end }}
+  {{- if $svc.externalIPs }}
+  externalIPs: {{- include "hlib.util.tplrender" (dict "value" $svc.externalIPs "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if hasKey $svc "allocateLoadBalancerNodePorts" }}
+  allocateLoadBalancerNodePorts: {{ include "hlib.util.tplrender" (dict "value" $svc.allocateLoadBalancerNodePorts "context" $) }}
+  {{- end }}
+  {{- if $svc.loadBalancerIP }}
+  loadBalancerIP: {{ include "hlib.util.tplrender" (dict "value" $svc.loadBalancerIP "context" $) }}
+  {{- end }}
+  {{- if $svc.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges: {{- include "hlib.util.tplrender" (dict "value" $svc.loadBalancerSourceRanges "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if $svc.loadBalancerClass }}
+  loadBalancerClass: {{ include "hlib.util.tplrender" (dict "value" $svc.loadBalancerClass "context" $) }}
+  {{- end }}
+  {{- if $svc.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ include "hlib.util.tplrender" (dict "value" $svc.externalTrafficPolicy "context" $) }}
+  {{- end }}
+  {{- if $svc.sessionAffinity }}
+  sessionAffinity: {{ include "hlib.util.tplrender" (dict "value" $svc.sessionAffinity "context" $) }}
+  {{- end }}
+  {{- if $svc.sessionAffinityConfig }}
+  sessionAffinityConfig: {{- include "hlib.util.tplrender" (dict "value" $svc.sessionAffinityConfig "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if $svc.healthCheckNodePort }}
+  healthCheckNodePort: {{ include "hlib.util.tplrender" (dict "value" $svc.healthCheckNodePort "context" $) }}
+  {{- end }}
+  {{- if $svc.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ include "hlib.util.tplrender" (dict "value" $svc.ipFamilyPolicy "context" $) }}
+  {{- end }}
+  {{- if $svc.internalTrafficPolicy }}
+  internalTrafficPolicy: {{ include "hlib.util.tplrender" (dict "value" $svc.internalTrafficPolicy "context" $) }}
+  {{- end }}
+  {{- if $svc.ipFamilies }}
+  ipFamilies: {{- include "hlib.util.tplrender" (dict "value" $svc.ipFamilies "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if $svc.trafficDistribution }}
+  trafficDistribution: {{ include "hlib.util.tplrender" (dict "value" $svc.trafficDistribution "context" $) }}
+  {{- end }}
+  {{- if ne $svc.type "ExternalName" }}
+  ports:
+    - name: svc-tcp-port
+      port: {{ include "hlib.util.tplrender" (dict "value" ($svc.port | default 80) "context" $) }}
+      targetPort: cont-tcp-port
+      protocol: TCP
+      {{- if and (or (eq $svc.type "NodePort") (eq $svc.type "LoadBalancer")) $svc.nodePort }}
+      nodePort: {{ include "hlib.util.tplrender" (dict "value" $svc.nodePort "context" $) }}
+      {{- end }}
+    {{- if $svc.extraPorts }}
+    {{- include "hlib.util.tplrender" (dict "value" $svc.extraPorts "context" $) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- define "hlib.service" -}}
+{{- if .override }}
+{{- $_ := set . "base" "hlib.service.tpl" -}}
+{{- include "hlib.util.merge" . -}}
+{{- else }}
+{{- toYaml (fromYaml (include "hlib.service.tpl" .)) -}}
+{{- end -}}
+{{- end -}}

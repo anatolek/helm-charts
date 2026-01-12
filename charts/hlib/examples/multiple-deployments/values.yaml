@@ -1,0 +1,27 @@
+# @ignored
+deploymentFirst:
+  container:
+    resourceTier: "S"
+    port: 8080
+    image:
+      repository: nginx
+
+# @ignored
+deploymentSecond:
+  container:
+    resourceTier: "M"
+    port: 8080
+    image:
+      repository: bitnami/nginx
+
+multiDepl:
+  postgres:
+    # -- PostgreSQL URL.
+    # @section -- multiDepl Application
+    host: some.postgres.test.host
+    # -- PostgreSQL user password.
+    # @section -- multiDepl Application
+    password: "SuperSecretP@ssvv0rd"
+    # -- PostgreSQL user name.
+    # @section -- multiDepl Application
+    username: simple

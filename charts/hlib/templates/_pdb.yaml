@@ -1,0 +1,35 @@
+{{- define "hlib.pdb.tpl" -}}
+{{- $ := .context -}}
+{{- $pdb := .values | default $.Values.pdb -}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "hlib.util.tplrender" (dict "value" ($pdb.name | default (include "hlib.fullname" $)) "context" $) }}
+  labels: {{- include "hlib.labels" $ | nindent 4 }}
+  {{- if $pdb.annotations }}
+  annotations: {{- include "hlib.util.tplrender" (dict "value" $pdb.annotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if and $pdb.minAvailable $pdb.maxUnavailable }}
+  {{- fail "Cannot set both '.minAvailable' and '.maxUnavailable' parameters for PDB — choose only one." }}
+  {{- end }}
+  {{- if $pdb.minAvailable }}
+  minAvailable: {{ include "hlib.util.tplrender" (dict "value" $pdb.minAvailable "context" $) }}
+  {{- else }}
+  maxUnavailable: {{ include "hlib.util.tplrender" (dict "value" ($pdb.maxUnavailable | default 1) "context" $) }}
+  {{- end }}
+  {{- if $pdb.unhealthyPodEvictionPolicy }}
+  unhealthyPodEvictionPolicy: {{ include "hlib.util.tplrender" (dict "value" $pdb.unhealthyPodEvictionPolicy "context" $) }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "hlib.selectorLabels" $ | nindent 6 }}
+{{- end }}
+
+{{- define "hlib.pdb" -}}
+{{- if .override }}
+{{- $_ := set . "base" "hlib.pdb.tpl" -}}
+{{- include "hlib.util.merge" . -}}
+{{- else }}
+{{- toYaml (fromYaml (include "hlib.pdb.tpl" .)) -}}
+{{- end -}}
+{{- end -}}

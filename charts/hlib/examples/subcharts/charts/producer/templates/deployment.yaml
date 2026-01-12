@@ -1,0 +1,20 @@
+{{- include "hlib.deployment" (dict "context" . "override" "producer.deployment" "values" .Values.deployment) -}}
+
+{{- define "producer.deployment" -}}
+{{- $env := fromYaml (include "producer.deployment.container.env" .) -}}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print .Template.BasePath "/secret.yaml") $ | sha256sum }}
+    spec:
+      containers:
+      - {{- include "hlib.container" (dict "context" . "env" $env "override" "producer.deployment.container" "values" .Values.deployment.container) }}
+{{- end -}}
+
+{{- define "producer.deployment.container" -}}
+envFrom:
+  - secretRef:
+      name: {{ include "hlib.fullname" . }}
+{{- end -}}

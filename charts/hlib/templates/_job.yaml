@@ -1,0 +1,95 @@
+{{- define "hlib.job.tpl" -}}
+{{- $ := .context -}}
+{{- $job := .values | default $.Values.job -}}
+{{- $env := dict -}}
+{{- if .envTpl }}
+  {{- $env = fromYaml (include .envTpl $) -}}
+{{- end }}
+{{- $sa := ((.dependencies).serviceAccount) | default $.Values.serviceAccount -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "hlib.util.tplrender" (dict "value" ($job.name | default (include "hlib.fullname" $)) "context" $) }}
+  labels: {{- include "hlib.labels" $ | nindent 4 }}
+  {{- if $job.annotations }}
+  annotations: {{- include "hlib.util.tplrender" (dict "value" $job.annotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if $job.activeDeadlineSeconds }}
+  activeDeadlineSeconds: {{ include "hlib.util.tplrender" (dict "value" $job.activeDeadlineSeconds "context" $) }}
+  {{- end }}
+  {{- if $job.backoffLimit }}
+  backoffLimit: {{ include "hlib.util.tplrender" (dict "value" $job.backoffLimit "context" $) }}
+  {{- end }}
+  ttlSecondsAfterFinished: {{ include "hlib.util.tplrender" (dict "value" ($job.ttlSecondsAfterFinished | default 3600) "context" $) }}
+  template:
+    metadata:
+      {{- if $job.podAnnotations }}
+      annotations: {{- include "hlib.util.tplrender" (dict "value" $job.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      labels: {{- include "hlib.selectorLabels" $ | nindent 8 }}
+    spec:
+      {{- if $sa.enabled }}
+      serviceAccountName: {{ include "hlib.util.tplrender" (dict "value" ($sa.name | default (include "hlib.fullname" $)) "context" $) }}
+      {{- end }}
+      {{- if (($.Values.global).imagePullSecrets) | default $job.imagePullSecrets }}
+      imagePullSecrets: {{- include "hlib.util.tplrender" (dict "value" (($.Values.global).imagePullSecrets | default $job.imagePullSecrets) "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $job.podSecurityContext }}
+      securityContext: {{- include "hlib.util.tplrender" (dict "value" $job.podSecurityContext "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if (($.Values.global).nodeSelector) | default $job.nodeSelector }}
+      nodeSelector: {{- include "hlib.util.tplrender" (dict "value" (($.Values.global).nodeSelector | default $job.nodeSelector) "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if (($.Values.global).affinity) | default $job.affinity }}
+      affinity: {{- include "hlib.util.tplrender" (dict "value" (($.Values.global).affinity | default $job.affinity) "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if (($.Values.global).tolerations) | default $job.tolerations }}
+      tolerations: {{- include "hlib.util.tplrender" (dict "value" (($.Values.global).tolerations | default $job.tolerations) "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $job.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "hlib.util.tplrender" (dict "value" $job.topologySpreadConstraints "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $job.podDnsConfig }}
+      dnsConfig: {{- include "hlib.util.tplrender" (dict "value" $job.podDnsConfig "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $job.podDnsPolicy }}
+      dnsPolicy: {{ include "hlib.util.tplrender" (dict "value" $job.podDnsPolicy "context" $) }}
+      {{- end }}
+      {{- if $job.podHostNetwork }}
+      hostNetwork: {{ include "hlib.util.tplrender" (dict "value" $job.podHostNetwork "context" $) }}
+      {{- end }}
+      {{- if $job.podHostAliases }}
+      hostAliases: {{- include "hlib.util.tplrender" (dict "value" $job.podHostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $job.podHostname }}
+      hostname: {{ include "hlib.util.tplrender" (dict "value" $job.podHostname "context" $) }}
+      {{- end }}
+      {{- if hasKey $job "podShareProcessNamespace" }}
+      shareProcessNamespace: {{ include "hlib.util.tplrender" (dict "value" $job.podShareProcessNamespace "context" $) }}
+      {{- end }}
+      {{- if $job.priorityClassName }}
+      priorityClassName: {{ include "hlib.util.tplrender" (dict "value" $job.priorityClassName "context" $) }}
+      {{- end }}
+      {{- if $job.runtimeClassName }}
+      runtimeClassName: {{ include "hlib.util.tplrender" (dict "value" $job.runtimeClassName "context" $) }}
+      {{- end }}
+      {{- if $job.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ include "hlib.util.tplrender" (dict "value" $job.terminationGracePeriodSeconds "context" $) }}
+      {{- end }}
+      restartPolicy: {{ include "hlib.util.tplrender" (dict "value" ($job.restartPolicy | default "Never") "context" $) }}
+      volumes:
+      - name: temp-dir
+        emptyDir: {}
+      containers:
+      - {{- include "hlib.container" (dict "context" $ "values" (required "Job container configuration 'JOB_PATH.container' required!" $job.container) "env" $env) }}
+{{- end }}
+
+{{- define "hlib.job" -}}
+{{- if .override }}
+{{- $_ := set . "base" "hlib.job.tpl" -}}
+{{- include "hlib.util.merge" . -}}
+{{- else }}
+{{- toYaml (fromYaml (include "hlib.job.tpl" .)) -}}
+{{- end -}}
+{{- end -}}

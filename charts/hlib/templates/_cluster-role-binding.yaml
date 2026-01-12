@@ -1,0 +1,31 @@
+{{- define "hlib.clusterRoleBinding.tpl" -}}
+{{- $ := .context -}}
+{{- $crb := .values | default (($.Values.rbac).clusterRoleBinding) -}}
+{{- $sa := ((.dependencies).serviceAccount) | default $.Values.serviceAccount -}}
+{{- $crole := ((.dependencies).clusterRole) | default (($.Values.rbac).clusterRole) -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "hlib.util.tplrender" (dict "value" ($crb.name | default (include "hlib.fullname" $)) "context" $) }}
+  labels: {{- include "hlib.labels" $ | nindent 4 }}
+  {{- if $crb.annotations }}
+  annotations: {{- include "hlib.util.tplrender" (dict "value" $crb.annotations "context" $) | nindent 4 }}
+  {{- end }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "hlib.util.tplrender" (dict "value" ($sa.name | default (include "hlib.fullname" $)) "context" $) }}
+    namespace: {{ $.Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "hlib.util.tplrender" (dict "value" ($crole.name | default (include "hlib.fullname" $)) "context" $) }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
+
+{{- define "hlib.clusterRoleBinding" -}}
+{{- if .override }}
+{{- $_ := set . "base" "hlib.clusterRoleBinding.tpl" -}}
+{{- include "hlib.util.merge" . -}}
+{{- else }}
+{{- toYaml (fromYaml (include "hlib.clusterRoleBinding.tpl" .)) -}}
+{{- end -}}
+{{- end -}}

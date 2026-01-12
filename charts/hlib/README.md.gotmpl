@@ -1,0 +1,39 @@
+{{- template "chart.header" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}
+
+A reusable Helm library chart that provides common Kubernetes template primitives for building consistent, maintainable charts across GT applications.
+This library eliminates code duplication by offering pre-built templates for standard Kubernetes resources including deployments, services, ingress, RBAC, jobs, and more. Charts using this library benefit from standardized configurations, predefined resource tiers, and consistent labeling patterns.
+
+{{ template "chart.requirementsSection" . }}
+
+The library may include new resource parameters that are recently added, enabled by default, and marked as at least a beta feature.
+Also, some old parameters and API versions may be deprecated and their support removed from the library.
+
+{{ .Files.Get ".docs/getting-started.md" }}
+{{ .Files.Get ".docs/predefined-variables.md" }}
+{{ .Files.Get ".docs/predefined-functions.md" }}
+
+## Using the Helm library
+
+{{ .Files.Get ".docs/container.md" }}
+{{ .Files.Get ".docs/deployment.md" }}
+{{ .Files.Get ".docs/cron-job.md" }}
+{{ .Files.Get ".docs/job.md" }}
+{{ .Files.Get ".docs/service.md" }}
+{{ .Files.Get ".docs/serviceaccount.md" }}
+{{ .Files.Get ".docs/secret.md" }}
+{{ .Files.Get ".docs/configmap.md" }}
+{{ .Files.Get ".docs/ingress.md" }}
+{{ .Files.Get ".docs/hpa.md" }}
+{{ .Files.Get ".docs/pdb.md" }}
+{{ .Files.Get ".docs/role.md" }}
+{{ .Files.Get ".docs/role-binding.md" }}
+{{ .Files.Get ".docs/cluster-role.md" }}
+{{ .Files.Get ".docs/cluster-role-binding.md" }}
+{{ .Files.Get ".docs/diagnostic.md" }}
+{{ .Files.Get ".docs/notes.md" }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ .Files.Get ".docs/contributions.md" }}

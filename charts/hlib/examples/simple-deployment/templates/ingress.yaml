@@ -1,0 +1,3 @@
+{{- if .Values.ingress.enabled }}
+{{- include "hlib.ingress" (dict "context" .) -}}
+{{- end }}

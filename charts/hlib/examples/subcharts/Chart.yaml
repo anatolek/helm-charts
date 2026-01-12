@@ -1,0 +1,16 @@
+apiVersion: v2
+appVersion: "1"
+description: A Helm chart for deploying SubChart application
+keywords:
+- subchart
+name: subchart
+type: application
+version: "1"
+icon: https://raw.githubusercontent.com/anatolek/hlib/master/img/icon.png
+dependencies:
+- name: consumer
+  version: ">= 0.0.0"
+  repository: https://github.com/anatolek/hlib
+- name: producer
+  version: ">= 0.0.0"
+  repository: https://github.com/anatolek/hlib

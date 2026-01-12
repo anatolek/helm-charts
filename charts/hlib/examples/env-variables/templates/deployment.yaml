@@ -1,0 +1,8 @@
+{{- include "hlib.deployment" (dict "context" . "override" "envVars.deployment" "envTpl" "envVars.deployment.container.env") -}}
+{{- define "envVars.deployment" -}}
+spec:
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print .Template.BasePath "/secret.yaml") $ | sha256sum }}
+{{- end -}}

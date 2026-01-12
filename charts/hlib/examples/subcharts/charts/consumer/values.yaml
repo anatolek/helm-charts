@@ -1,0 +1,34 @@
+autoscaling:
+  # -- Whether to enable Horizontal Pod Autoscaling.
+  enabled: false
+
+serviceAccount:
+  # -- Whether to enable Service Account.
+  enabled: false
+
+pdb:
+  # -- Whether to enable Pod Disruption Budget.
+  enabled: false
+
+# @ignored
+deployment:
+  container:
+    resourceTier: "S"
+    port: 8080
+    image:
+      repository: nginx
+
+app:
+  # -- Application mode.
+  # @section -- Consumer Application
+  mode: consumer
+  postgres:
+    # -- PostgreSQL URL.
+    # @section -- Consumer Application
+    host: ""
+    # -- PostgreSQL user password.
+    # @section -- Consumer Application
+    password: ""
+    # -- PostgreSQL user name.
+    # @section -- Consumer Application
+    username: ""

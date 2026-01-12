@@ -1,0 +1,115 @@
+{{- /* vim: set filetype=mustache: */ -}}
+
+{{- /*
+Merges two YAML snippets rendered by template includes.
+*/ -}}
+{{- define "hlib.util.merge" -}}
+{{- $override := fromYaml (include .override .context) | default (dict) -}}
+{{- $base := fromYaml (include .base .) | default (dict) -}}
+{{- toYaml (merge $override $base) -}}
+{{- end -}}
+
+{{- /*
+Renders Kubernetes environment variable definitions based on input dictionary.
+*/ -}}
+{{- define "hlib.util.renderEnvVars" -}}
+{{- $env := .env }}
+{{- $ctx := .context }}
+{{- if kindIs "slice" $env }}
+  {{- range $item := $env }}
+    - name: {{ $item.name | quote }}
+      value: {{ $item.value | quote }}
+  {{- end }}
+{{- else }}
+  {{- range $key, $config := $env }}
+    {{- if and (ne $config nil) (not (eq (toString $config) "<no value>")) }}
+    - name: {{ $key | quote }}
+      {{- if or (kindIs "string" $config) (kindIs "float64" $config) (kindIs "int" $config) (kindIs "bool" $config) }}
+      value: {{ $config | quote }}
+      {{- else if and (hasKey $config "secretKeyRef") (gt (len (keys $config.secretKeyRef)) 0) }}
+      valueFrom:
+        secretKeyRef:
+          name: {{ first (keys $config.secretKeyRef) | quote }}
+          key: {{ index $config.secretKeyRef (first (keys $config.secretKeyRef)) | quote }}
+      {{- else if and (hasKey $config "configMapKeyRef") (gt (len (keys $config.configMapKeyRef)) 0) }}
+      valueFrom:
+        configMapKeyRef:
+          name: {{ first (keys $config.configMapKeyRef) | quote }}
+          key: {{ index $config.configMapKeyRef (first (keys $config.configMapKeyRef)) | quote }}
+      {{- else if hasKey $config "value" }}
+      value: {{ $config.value | quote }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{- /*
+Renders a full image reference string using registry, repository, tag, or digest.
+*/ -}}
+{{- define "hlib.util.image" -}}
+{{- $requiredMsg := include "hlib.default-check-required-msg" $ -}}
+{{- $registry := ((.global).imageRegistry) | default .imageRoot.registry -}}
+{{- $repository := (required (printf $requiredMsg ".image.repository") .imageRoot.repository) -}}
+{{- $digest := .imageRoot.digest -}}
+{{- $separator := ":" -}}
+{{- $termination := .imageRoot.tag | toString -}}
+{{- if not .imageRoot.tag }}
+  {{- if .chart }}
+    {{- $termination = .chart.AppVersion | toString -}}
+  {{- end -}}
+{{- end -}}
+{{- if $digest }}
+    {{- $separator = "@" -}}
+    {{- $termination = $digest | toString -}}
+{{- end }}
+{{- if $registry }}
+    {{- printf "%s/%s%s%s" $registry $repository $separator $termination -}}
+{{- else }}
+    {{- printf "%s%s%s"  $repository $separator $termination -}}
+{{- end }}
+{{- end -}}
+
+{{- /*
+This template evaluates a string or YAML object as a Helm template using the `tpl` function.
+*/ -}}
+{{- define "hlib.util.tplrender" -}}
+{{- $value := typeIs "string" .value | ternary .value (.value | toYaml) }}
+{{- if contains "{{" (toJson .value) }}
+  {{- if .scope }}
+      {{- tpl (cat "{{- with $.RelativeScope -}}" $value "{{- end }}") (merge (dict "RelativeScope" .scope) .context) }}
+  {{- else }}
+    {{- tpl $value .context }}
+  {{- end }}
+{{- else }}
+    {{- $value }}
+{{- end }}
+{{- end -}}
+
+{{- /*
+This template renders prefixed Kafka values.
+*/ -}}
+{{- define "hlib.util.springKafkaValues" -}}
+{{- $prefix := .prefix }}
+{{- $values := .values }}
+{{- if $values }}
+  {{- if not (contains "=" (toString $values)) }}
+{{ printf "%s" $prefix | quote }}: {{ $values | quote }}
+  {{- else }}
+    {{- $pairs := split ";" $values }}
+    {{- range $pair := $pairs }}
+      {{- $kv := split "=" $pair }}
+      {{- if eq (len $kv) 2 }}
+{{ printf "%s.%s" $prefix $kv._0 | quote }}: {{ $kv._1 | quote }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+A default message string to be used when checking for a required value
+*/}}
+{{- define "hlib.default-check-required-msg" -}}
+{{- "No value found for '%s'" -}}
+{{- end -}}

@@ -1,0 +1,51 @@
+{{- define "hlib.ingress.tpl" -}}
+{{- $ := .context -}}
+{{- $ing := .values | default $.Values.ingress -}}
+{{- $svc := ((.dependencies).service) | default $.Values.service -}}
+{{- $requiredMsg := include "hlib.default-check-required-msg" $ -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "hlib.util.tplrender" (dict "value" ($ing.name | default (include "hlib.fullname" $)) "context" $) }}
+  labels: {{- include "hlib.labels" $ | nindent 4 }}
+  {{- if $ing.annotations }}
+  annotations: {{- include "hlib.util.tplrender" (dict "value" $ing.annotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if $ing.className }}
+  ingressClassName: {{ include "hlib.util.tplrender" (dict "value" $ing.className "context" $) }}
+  {{- end }}
+  {{- if $ing.tls }}
+  tls:
+    {{- range $ing.tls }}
+    - hosts: {{- include "hlib.util.tplrender" (dict "value" .hosts "context" $) | nindent 6 }}
+      secretName: {{ include "hlib.util.tplrender" (dict "value" (required (printf $requiredMsg "tls.secretName") .secretName) "context" $) }}
+    {{- end }}
+  {{- end }}
+  rules:
+  {{- range (required (printf $requiredMsg ".hosts") $ing.hosts) }}
+  - host: {{ include "hlib.util.tplrender" (dict "value" .host "context" $) }}
+    http:
+      paths:
+      {{- range .paths }}
+      - path: {{ include "hlib.util.tplrender" (dict "value" .path "context" $) }}
+        {{- if .pathType }}
+        pathType: {{ include "hlib.util.tplrender" (dict "value" .pathType "context" $) }}
+        {{- end }}
+        backend:
+          service:
+            name: {{ include "hlib.util.tplrender" (dict "value" ($svc.name | default (include "hlib.fullname" $)) "context" $) }}
+            port:
+              number: {{ include "hlib.util.tplrender" (dict "value" ($svc.port | default 80) "context" $) }}
+      {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- define "hlib.ingress" -}}
+{{- if .override }}
+{{- $_ := set . "base" "hlib.ingress.tpl" -}}
+{{- include "hlib.util.merge" . -}}
+{{- else }}
+{{- toYaml (fromYaml (include "hlib.ingress.tpl" .)) -}}
+{{- end -}}
+{{- end -}}

@@ -1,0 +1,24 @@
+{{- if .Values.simple.preProvision.enabled }}
+{{- include "hlib.job" (dict "context" . "values" .Values.simple.preProvision "override" "simple.preProvision") -}}
+{{- end }}
+
+{{- define "simple.preProvision" }}
+{{- $env := fromYaml (include "simple.preProvision.container.env" .) -}}
+metadata:
+  name: {{ printf "%s-pre-provision" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      containers:
+      - {{- include "hlib.container" (dict "context" . "env" $env "values" .Values.simple.preProvision.container "override" "simple.preProvision.container") }}
+{{- end }}
+
+{{- define "simple.preProvision.container" -}}
+envFrom:
+  - secretRef:
+      name: {{ printf "%s-pre-provision" (include "hlib.fullname" $) | trunc 63 | trimSuffix "-" }}
+{{- end -}}

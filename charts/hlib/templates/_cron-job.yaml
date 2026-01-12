@@ -1,0 +1,129 @@
+{{- define "hlib.cronJob.tpl" -}}
+{{- $ := .context -}}
+{{- $cronJob := .values | default $.Values.cronJob -}}
+{{- $env := dict -}}
+{{- if .envTpl }}
+  {{- $env = fromYaml (include .envTpl $) -}}
+{{- end }}
+{{- $sa := ((.dependencies).serviceAccount) | default $.Values.serviceAccount -}}
+{{- $requiredMsg := include "hlib.default-check-required-msg" $ -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "hlib.util.tplrender" (dict "value" ($cronJob.name | default (include "hlib.fullname" $)) "context" $) }}
+  labels: {{- include "hlib.labels" $ | nindent 4 }}
+  {{- if $cronJob.annotations }}
+  annotations: {{- include "hlib.util.tplrender" (dict "value" $cronJob.annotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  schedule: {{ include "hlib.util.tplrender" (dict "value" (required (printf $requiredMsg "cronJob.schedule") $cronJob.schedule) "context" $) | quote }}
+  {{- if $cronJob.startingDeadlineSeconds }}
+  startingDeadlineSeconds: {{ include "hlib.util.tplrender" (dict "value" $cronJob.startingDeadlineSeconds "context" $) }}
+  {{- end }}
+  {{- if $cronJob.concurrencyPolicy }}
+  concurrencyPolicy: {{ include "hlib.util.tplrender" (dict "value" $cronJob.concurrencyPolicy "context" $) }}
+  {{- end }}
+  {{- if $cronJob.successfulJobsHistoryLimit }}
+  successfulJobsHistoryLimit: {{ include "hlib.util.tplrender" (dict "value" $cronJob.successfulJobsHistoryLimit "context" $) }}
+  {{- end }}
+  {{- if $cronJob.failedJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ include "hlib.util.tplrender" (dict "value" $cronJob.failedJobsHistoryLimit "context" $) }}
+  {{- end }}
+  {{- if (($.Values.global).timezone) }}
+  timeZone: {{ include "hlib.util.tplrender" (dict "value" $.Values.global.timezone "context" $) }}
+  {{- end }}
+  {{- if hasKey $cronJob "suspend" }}
+  suspend: {{ include "hlib.util.tplrender" (dict "value" $cronJob.suspend "context" $) }}
+  {{- end }}
+  jobTemplate:
+    spec:
+      {{- if $cronJob.activeDeadlineSeconds }}
+      activeDeadlineSeconds: {{ include "hlib.util.tplrender" (dict "value" $cronJob.activeDeadlineSeconds "context" $) }}
+      {{- end }}
+      {{- if $cronJob.backoffLimit }}
+      backoffLimit: {{ include "hlib.util.tplrender" (dict "value" $cronJob.backoffLimit "context" $) }}
+      {{- end }}
+      {{- if $cronJob.completions }}
+      completions: {{ include "hlib.util.tplrender" (dict "value" $cronJob.completions "context" $) }}
+      {{- end }}
+      {{- if $cronJob.parallelism }}
+      parallelism: {{ include "hlib.util.tplrender" (dict "value" $cronJob.parallelism "context" $) }}
+      {{- end }}
+      {{- if $cronJob.podFailurePolicyRules }}
+      podFailurePolicy:
+        rules: {{- include "hlib.util.tplrender" (dict "value" $cronJob.podFailurePolicyRules "context" $) | nindent 10 }}
+      {{- end }}
+      {{- if $cronJob.ttlSecondsAfterFinished }}
+      ttlSecondsAfterFinished: {{ include "hlib.util.tplrender" (dict "value" $cronJob.ttlSecondsAfterFinished "context" $) }}
+      {{- end }}
+      template:
+        metadata:
+          labels: {{- include "hlib.selectorLabels" $ | nindent 12 }}
+          {{- if $cronJob.podAnnotations }}
+          annotations: {{- include "hlib.util.tplrender" (dict "value" $cronJob.podAnnotations "context" $) | nindent 12 }}
+          {{- end }}
+        spec:
+          {{- if $sa.enabled }}
+          serviceAccountName: {{ include "hlib.util.tplrender" (dict "value" ($sa.name | default (include "hlib.fullname" $)) "context" $) }}
+          {{- end }}
+          {{- if (($.Values.global).imagePullSecrets) | default $cronJob.imagePullSecrets }}
+          imagePullSecrets: {{- include "hlib.util.tplrender" (dict "value" (($.Values.global).imagePullSecrets | default $cronJob.imagePullSecrets) "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $cronJob.podSecurityContext }}
+          securityContext: {{- include "hlib.util.tplrender" (dict "value" $cronJob.podSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if (($.Values.global).nodeSelector) | default $cronJob.nodeSelector }}
+          nodeSelector: {{- include "hlib.util.tplrender" (dict "value" (($.Values.global).nodeSelector | default $cronJob.nodeSelector) "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if (($.Values.global).affinity) | default $cronJob.affinity }}
+          affinity: {{- include "hlib.util.tplrender" (dict "value" (($.Values.global).affinity | default $cronJob.affinity) "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if (($.Values.global).tolerations) | default $cronJob.tolerations }}
+          tolerations: {{- include "hlib.util.tplrender" (dict "value" (($.Values.global).tolerations | default $cronJob.tolerations) "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $cronJob.topologySpreadConstraints }}
+          topologySpreadConstraints: {{- include "hlib.util.tplrender" (dict "value" $cronJob.topologySpreadConstraints "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $cronJob.podDnsConfig }}
+          dnsConfig: {{- include "hlib.util.tplrender" (dict "value" $cronJob.podDnsConfig "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $cronJob.podDnsPolicy }}
+          dnsPolicy: {{ include "hlib.util.tplrender" (dict "value" $cronJob.podDnsPolicy "context" $) }}
+          {{- end }}
+          {{- if $cronJob.podHostNetwork }}
+          hostNetwork: {{ include "hlib.util.tplrender" (dict "value" $cronJob.podHostNetwork "context" $) }}
+          {{- end }}
+          {{- if $cronJob.podHostAliases }}
+          hostAliases: {{- include "hlib.util.tplrender" (dict "value" $cronJob.podHostAliases "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $cronJob.podHostname }}
+          hostname: {{ include "hlib.util.tplrender" (dict "value" $cronJob.podHostname "context" $) }}
+          {{- end }}
+          {{- if $cronJob.podShareProcessNamespace }}
+          shareProcessNamespace: {{ include "hlib.util.tplrender" (dict "value" $cronJob.podShareProcessNamespace "context" $) }}
+          {{- end }}
+          {{- if $cronJob.priorityClassName }}
+          priorityClassName: {{ include "hlib.util.tplrender" (dict "value" $cronJob.priorityClassName "context" $) }}
+          {{- end }}
+          {{- if $cronJob.runtimeClassName }}
+          runtimeClassName: {{ include "hlib.util.tplrender" (dict "value" $cronJob.runtimeClassName "context" $) }}
+          {{- end }}
+          {{- if $cronJob.terminationGracePeriodSeconds }}
+          terminationGracePeriodSeconds: {{ include "hlib.util.tplrender" (dict "value" $cronJob.terminationGracePeriodSeconds "context" $) }}
+          {{- end }}
+          restartPolicy: {{ include "hlib.util.tplrender" (dict "value" ($cronJob.restartPolicy | default "Never") "context" $) }}
+          volumes:
+          - name: temp-dir
+            emptyDir: {}
+          containers:
+          - {{- include "hlib.container" (dict "context" $ "values" ($cronJob.container | required "CronJob container configuration 'CRONJOB_PATH.container' required!") "env" $env) | indent 4 }}
+{{- end }}
+
+{{- define "hlib.cronJob" -}}
+{{- if .override }}
+{{- $_ := set . "base" "hlib.cronJob.tpl" -}}
+{{- include "hlib.util.merge" . -}}
+{{- else }}
+{{- toYaml (fromYaml (include "hlib.cronJob.tpl" .)) -}}
+{{- end -}}
+{{- end -}}

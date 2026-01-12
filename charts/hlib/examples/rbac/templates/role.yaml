@@ -1,0 +1,13 @@
+{{- if .Values.rbac.enabled }}
+{{- include "hlib.role" (dict "context" . "override" "rbac.role") -}}
+{{- end }}
+
+{{- define "rbac.role" -}}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "endpoints", "pods"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+{{- end -}}

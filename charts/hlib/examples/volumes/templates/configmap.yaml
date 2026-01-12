@@ -1,0 +1,18 @@
+{{- include "hlib.configMap" (dict "context" . "override" "vol.configMap") -}}
+{{- define "vol.configMap" -}}
+data:
+  config.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <volConfiguration>
+        <application>
+            <name>vol</name>
+            <version>1.0.0</version>
+            <environment>development</environment>
+        </application>
+        <network>
+            <host>0.0.0.0</host>
+            <port>8080</port>
+            <enableTLS>false</enableTLS>
+        </network>
+    </volConfiguration>
+{{- end -}}

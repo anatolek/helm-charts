@@ -1,0 +1,26 @@
+{{- define "hlib.clusterRole.tpl" -}}
+{{- $ := .context -}}
+{{- $crole := .values | default (($.Values.rbac).clusterRole) -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "hlib.util.tplrender" (dict "value" ($crole.name | default (include "hlib.fullname" $)) "context" $) }}
+  labels: {{- include "hlib.labels" $ | nindent 4 }}
+  {{- if $crole.annotations }}
+  annotations: {{- include "hlib.util.tplrender" (dict "value" $crole.annotations "context" $) | nindent 4 }}
+  {{- end }}
+{{- if $crole.aggregationClusterRoleSelectors }}
+aggregationRule:
+  clusterRoleSelectors: {{- include "hlib.util.tplrender" (dict "value" $crole.aggregationClusterRoleSelectors "context" $) | nindent 4 }}
+{{- end }}
+rules: []
+{{- end }}
+
+{{- define "hlib.clusterRole" -}}
+{{- if .override }}
+{{- $_ := set . "base" "hlib.clusterRole.tpl" -}}
+{{- include "hlib.util.merge" . -}}
+{{- else }}
+{{- toYaml (fromYaml (include "hlib.clusterRole.tpl" .)) -}}
+{{- end -}}
+{{- end -}}

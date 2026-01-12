@@ -1,0 +1,10 @@
+{{- if .Values.rbac.enabled }}
+{{- include "hlib.clusterRole" (dict "context" . "override" "rbac.clusterRole") -}}
+{{- end }}
+
+{{- define "rbac.clusterRole" -}}
+rules:
+  - apiGroups: [""]
+    resources: ["endpoints", "pods", "nodes", "services"]
+    verbs: ["get", "list"]
+{{- end -}}

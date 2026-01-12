@@ -1,0 +1,11 @@
+{{- include "hlib.service" (dict "context" . "override" "multi-depl.serviceFirst") -}}
+
+{{- define "multi-depl.serviceFirst" -}}
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ printf "%s-first" (include "hlib.name" $) | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: producer
+spec:
+  selector:
+    app.kubernetes.io/name: {{ printf "%s-first" (include "hlib.name" $) | trunc 63 | trimSuffix "-" }}
+{{- end -}}

@@ -1,0 +1,3 @@
+{{- if .Values.autoscaling.enabled }}
+{{- include "hlib.hpa" (dict "context" .) -}}
+{{- end }}

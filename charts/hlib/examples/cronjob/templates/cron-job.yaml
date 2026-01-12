@@ -1,0 +1,18 @@
+{{- include "hlib.cronJob" (dict "context" . "override" "cronj.cronJob") -}}
+
+{{- define "cronj.cronJob" -}}
+{{- $env := fromYaml (include "cronj.cronJob.container.env" .) -}}
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - {{- include "hlib.container" (dict "context" . "values" .Values.cronJob.container "env" $env "override" "cronj.cronJob.container") | indent 4 }}
+{{- end -}}
+
+{{- define "cronj.cronJob.container" -}}
+envFrom:
+  - secretRef:
+      name: {{ include "hlib.fullname" . }}
+{{- end -}}

@@ -1,0 +1,23 @@
+diagnosticMode:
+  # -- Whether to enable diagnostic mode
+  enabled: false
+
+# @ignored
+consumer: {}
+
+# @ignored
+producer: {}
+
+global:
+  # @ignored
+  applicationPartOf: "subchart"
+  postgres:
+    # -- PostgreSQL URL.
+    # @section -- SubChart Application
+    host: some.postgres.test.host
+    # -- PostgreSQL user password.
+    # @section -- SubChart Application
+    password: "SuperSecretP@ssvv0rd"
+    # -- PostgreSQL user name.
+    # @section -- SubChart Application
+    username: subchart-dbuser

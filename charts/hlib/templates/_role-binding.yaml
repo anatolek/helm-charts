@@ -1,0 +1,31 @@
+{{- define "hlib.roleBinding.tpl" -}}
+{{- $ := .context -}}
+{{- $rb := .values | default (($.Values.rbac).roleBinding) -}}
+{{- $sa := ((.dependencies).serviceAccount) | default $.Values.serviceAccount -}}
+{{- $role := ((.dependencies).role) | default (($.Values.rbac).role) -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "hlib.util.tplrender" (dict "value" ($rb.name | default (include "hlib.fullname" $)) "context" $) }}
+  labels: {{- include "hlib.labels" $ | nindent 4 }}
+  {{- if $rb.annotations }}
+  annotations: {{- include "hlib.util.tplrender" (dict "value" $rb.annotations "context" $) | nindent 4 }}
+  {{- end }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "hlib.util.tplrender" (dict "value" ($sa.name | default (include "hlib.fullname" $)) "context" $) }}
+    namespace: {{ $.Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "hlib.util.tplrender" (dict "value" ($role.name | default (include "hlib.fullname" $)) "context" $) }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
+
+{{- define "hlib.roleBinding" -}}
+{{- if .override }}
+{{- $_ := set . "base" "hlib.roleBinding.tpl" -}}
+{{- include "hlib.util.merge" . -}}
+{{- else }}
+{{- toYaml (fromYaml (include "hlib.roleBinding.tpl" .)) -}}
+{{- end -}}
+{{- end -}}

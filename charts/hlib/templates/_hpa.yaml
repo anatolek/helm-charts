@@ -1,0 +1,52 @@
+{{- define "hlib.hpa.tpl" -}}
+{{- $ := .context -}}
+{{- $hpa := .values | default $.Values.autoscaling -}}
+{{- $deploy := ((.dependencies).deployment) | default $.Values.deployment -}}
+{{- $requiredMsg := include "hlib.default-check-required-msg" $ -}}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "hlib.util.tplrender" (dict "value" ($hpa.name | default (include "hlib.fullname" $)) "context" $) }}
+  labels: {{- include "hlib.labels" $ | nindent 4 }}
+  {{- if $hpa.annotations }}
+  annotations: {{- include "hlib.util.tplrender" (dict "value" $hpa.annotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "hlib.util.tplrender" (dict "value" ($deploy.name | default (include "hlib.fullname" $)) "context" $) }}
+  minReplicas: {{ include "hlib.util.tplrender" (dict "value" (required (printf $requiredMsg ".minReplicas") $hpa.minReplicas) "context" $) }}
+  maxReplicas: {{ include "hlib.util.tplrender" (dict "value" (required (printf $requiredMsg ".maxReplicas") $hpa.maxReplicas) "context" $) }}
+  {{- if or $hpa.targetCPUUtilizationPercentage $hpa.targetMemoryUtilizationPercentage }}
+  metrics:
+    {{- if $hpa.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ include "hlib.util.tplrender" (dict "value" $hpa.targetCPUUtilizationPercentage "context" $) }}
+    {{- end }}
+    {{- if $hpa.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ include "hlib.util.tplrender" (dict "value" $hpa.targetMemoryUtilizationPercentage "context" $) }}
+    {{- end }}
+  {{- end }}
+  {{- if $hpa.behavior }}
+  behavior: {{- include "hlib.util.tplrender" (dict "value" $hpa.behavior "context" $) | nindent 4 }}
+  {{- end }}
+{{- end }}
+
+{{- define "hlib.hpa" -}}
+{{- if .override }}
+{{- $_ := set . "base" "hlib.hpa.tpl" -}}
+{{- include "hlib.util.merge" . -}}
+{{- else }}
+{{- toYaml (fromYaml (include "hlib.hpa.tpl" .)) -}}
+{{- end -}}
+{{- end -}}

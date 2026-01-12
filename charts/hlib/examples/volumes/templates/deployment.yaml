@@ -1,0 +1,44 @@
+{{- include "hlib.deployment" (dict "context" . "override" "vol.deployment") -}}
+
+{{- define "vol.deployment" -}}
+{{- $env := fromYaml (include "vol.deployment.container.env" .) -}}
+spec:
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print .Template.BasePath "/secret.yaml") $ | sha256sum }}
+        checksum/config: {{ include (print .Template.BasePath "/configmap.yaml") $ | sha256sum }}
+    spec:
+      volumes:
+      - name: temp-dir
+        emptyDir: {}
+      - name: app-volume
+        projected:
+          sources:
+          - secret:
+              name: {{ include "hlib.fullname" . }}
+              items:
+              - key: ENCRYPTION_KEY
+                path: secret-key
+          - configMap:
+              name: {{ include "hlib.fullname" . }}
+              items:
+              - key: config.xml
+                path: config.xml
+      containers:
+      - {{- include "hlib.container" (dict "context" . "env" $env "override" "vol.deployment.container") }}
+{{- end -}}
+
+{{- define "vol.deployment.container" -}}
+volumeMounts:
+- mountPath: /tmp
+  name: temp-dir
+- name: app-volume
+  mountPath: "/app/config.xml"
+  subPath: config.xml
+  readOnly: true
+- name: app-volume
+  mountPath: "/app/secret-key"
+  subPath: secret-key
+  readOnly: true
+{{- end -}}

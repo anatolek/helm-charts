@@ -1,0 +1,13 @@
+{{- define "envVars.deployment.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+PSEUDO_BOOLEAN: {{ .Values.envVars.pseudoBoolean | quote }}
+JWT_VALIDATION_ENABLED: {{ .Values.envVars.jwt.enabled }}
+POSTGRES_HOST: {{ .Values.envVars.postgres.host }}
+POSTGRES_USERNAME:
+  secretKeyRef:
+    {{ include "hlib.fullname" . }}: POSTGRES_USERNAME
+POSTGRES_PASSWORD:
+  secretKeyRef:
+    {{ include "hlib.fullname" . }}: POSTGRES_PASSWORD
+{{- include "hlib.util.springKafkaValues" (dict "prefix" "spring.kafka.producer.properties" "values" .Values.envVars.kafka.producer.properties) }}
+{{- end -}}

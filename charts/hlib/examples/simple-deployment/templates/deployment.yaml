@@ -1,0 +1,19 @@
+{{- include "hlib.deployment" (dict "context" . "override" "simple.deployment") -}}
+
+{{- define "simple.deployment" -}}
+{{- $env := fromYaml (include "simple.deployment.container.env" .) -}}
+spec:
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print .Template.BasePath "/secret.yaml") $ | sha256sum }}
+    spec:
+      containers:
+      - {{- include "hlib.container" (dict "context" . "env" $env "override" "simple.deployment.container") }}
+{{- end -}}
+
+{{- define "simple.deployment.container" -}}
+envFrom:
+  - secretRef:
+      name: {{ include "hlib.fullname" . }}
+{{- end -}}
