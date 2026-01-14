@@ -4,6 +4,42 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: added
+          description: README.md is added to the chart
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: GitHub Repository
+          url: https://github.com/anatolek/helm-charts
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    created: "2026-01-14T16:55:31.222217252Z"
+    description: Helm library chart for common Kubernetes templates
+    digest: 626c031d2f0bb187e94aacfdeedef3aeae5028bfa76414d03fb1c40abb784ba4
+    home: https://github.com/anatolek/helm-charts
+    icon: https://raw.githubusercontent.com/anatolek/helm-charts/main/charts/hlib/img/icon.png
+    keywords:
+    - helm
+    - library
+    - kubernetes
+    - templates
+    - deployment
+    - cronjob
+    - service
+    - ingress
+    kubeVersion: '>=1.32.0-0'
+    maintainers:
+    - email: anatolek@ukr.net
+      name: Anatolii Pedchenko
+    name: hlib
+    sources:
+    - https://github.com/anatolek/helm-charts
+    type: library
+    urls:
+    - https://github.com/anatolek/helm-charts/releases/download/hlib-0.0.3/hlib-0.0.3.tgz
+    version: 0.0.3
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
           description: Values schema JSON generation
       artifacthub.io/containsSecurityUpdates: "false"
       artifacthub.io/license: Apache-2.0
@@ -87,4 +123,4 @@ entries:
     urls:
     - https://github.com/anatolek/helm-charts/releases/download/hlib-0.0.1/hlib-0.0.1.tgz
     version: 0.0.1
-generated: "2026-01-12T18:05:01.858172516Z"
+generated: "2026-01-14T16:55:31.222232511Z"
