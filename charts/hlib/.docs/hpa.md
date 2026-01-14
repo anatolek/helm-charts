@@ -6,7 +6,7 @@ Creates Kubernetes HorizontalPodAutoscaler resources.
 
 Include this template in your chart's `templates/hpa.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.hpa" (dict "context" .) }}
 ```
 
@@ -27,7 +27,7 @@ Used to override the configuration path of resources on which it depends.
 |--------------|----------------------|----------------------|
 | `deployment` | Deploymnet reference | `.Values.deployment` |
 
-```go
+```handlebars
 {{- $dependencies := dict "deployment" .Values.newDeployment -}}
 {{- include "hlib.hpa" (dict "context" . "dependencies" $dependencies) }}
 ```
@@ -36,7 +36,7 @@ Used to override the configuration path of resources on which it depends.
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.hpa" (dict "context" . "override" "app.hpa") -}}
 
 {{- define "app.hpa" -}}

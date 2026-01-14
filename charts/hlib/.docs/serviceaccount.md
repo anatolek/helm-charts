@@ -10,7 +10,7 @@ Creates Kubernetes ServiceAccount resources.
 
 Include this template in your chart's `templates/serviceaccount.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.serviceAccount" (dict "context" .) }}
 ```
 
@@ -26,7 +26,7 @@ Include this template in your chart's `templates/serviceaccount.yaml`:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.serviceAccount" (dict "context" . "override" "app.sa") -}}
 
 {{- define "app.sa" -}}

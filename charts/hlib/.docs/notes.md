@@ -6,7 +6,7 @@ Provides post-installation information for users, including access instructions 
 
 Include this template in your chart's `templates/_NOTES.txt`:
 
-```go
+```handlebars
 {{- include "hlib.notes.chartInfo" (dict "context" .) }}
 
 {{- include "hlib.notes.releaseInfo" (dict "context" .) }}
@@ -20,7 +20,7 @@ Include this template in your chart's `templates/_NOTES.txt`:
 
 #### Chart Information
 
-```go
+```handlebars
 {{- include "hlib.notes.chartInfo" (dict "context" .) }}
 ```
 
@@ -31,12 +31,12 @@ CHART NAME: my-app
 CHART VERSION: 1.2.3
 APP VERSION: v4.5.0
 SOURCES:
-  - https://gitlab.com/my-org/my-app
+  - https://github.com/my-org/my-app
 ```
 
 #### Release Information
 
-```go
+```handlebars
 {{- include "hlib.notes.releaseInfo" (dict "context" .) }}
 ```
 
@@ -50,22 +50,22 @@ REVISION: 2
 
 #### Application Access Instructions
 
-```go
+```handlebars
 {{- include "hlib.notes.accessAppInfo" (dict "context" .) }}
 ```
 
 Output Depends on Configuration:
 
-| Service Type  | 	Example Output                                             |
+| Service Type  | 	Example Output                                            |
 |---------------|-------------------------------------------------------------|
 | Ingress       | Access application via Ingress: https://app.example.com/api |
-| NodePort	     | Provides kubectl commands to retrieve node IP and ports     |
-| LoadBalancer	 | Provides commands to get LB IP and port                     |
+| NodePort	    | Provides kubectl commands to retrieve node IP and ports     |
+| LoadBalancer	| Provides commands to get LB IP and port                     |
 | ClusterIP     | Provides port-forward command for local access              |
 
 #### Diagnostic Mode Setup
 
-```go
+```handlebars
 {{- include "hlib.notes.diagnosticMode" (dict "context" .) }}
 ```
 
@@ -84,6 +84,6 @@ CLUSTER_NAME=...
 
 Override Service/Ingress References
 
-```go
+```handlebars
 {{- include "hlib.notes.accessAppInfo" (dict "context" . "service" .Values.customService "ingress" .Values.specialIngress) }}
 ```

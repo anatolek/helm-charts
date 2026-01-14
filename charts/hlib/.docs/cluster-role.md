@@ -6,7 +6,7 @@ Creates Kubernetes ClusterRole resources.
 
 Include this template in your chart's `templates/cluster-role.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.clusterRole" (dict "context" .) }}
 ```
 
@@ -34,7 +34,7 @@ rbac:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.clusterRole" (dict "context" . "override" "app.clusterRole") -}}
 
 {{- define "app.clusterRole" -}}

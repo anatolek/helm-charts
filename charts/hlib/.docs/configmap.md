@@ -14,7 +14,7 @@ annotations:
 
 Include this template in your chart's `templates/configmap.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.configMap" (dict "context" .) }}
 ```
 
@@ -30,7 +30,7 @@ Include this template in your chart's `templates/configmap.yaml`:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.configMap" (dict "context" . "override" "app.configMap") -}}
 
 {{- define "app.configMap" -}}

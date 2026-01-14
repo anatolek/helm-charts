@@ -1,16 +1,17 @@
 {{- template "chart.header" . }}
 
 {{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}
+[![GitHub license](https://img.shields.io/github/license/anatolek/helm-charts)](https://github.com/anatolek/helm-charts)
 
-A reusable Helm library chart that provides common Kubernetes template primitives for building consistent, maintainable charts across GT applications.
-This library eliminates code duplication by offering pre-built templates for standard Kubernetes resources including deployments, services, ingress, RBAC, jobs, and more. Charts using this library benefit from standardized configurations, predefined resource tiers, and consistent labeling patterns.
+A reusable Helm library chart that provides common Kubernetes template primitives for building consistent, maintainable charts across applications.
+This library eliminates code duplication by offering pre-built templates for standard Kubernetes resources including deployments, services, ingress, RBAC, jobs, and more.
+Charts using this library benefit from standardized configurations, predefined resource tiers, and consistent labeling patterns.
 
 {{ template "chart.requirementsSection" . }}
 
 The library may include new resource parameters that are recently added, enabled by default, and marked as at least a beta feature.
 Also, some old parameters and API versions may be deprecated and their support removed from the library.
 
-{{ .Files.Get ".docs/getting-started.md" }}
 {{ .Files.Get ".docs/predefined-variables.md" }}
 {{ .Files.Get ".docs/predefined-functions.md" }}
 
@@ -35,5 +36,3 @@ Also, some old parameters and API versions may be deprecated and their support r
 {{ .Files.Get ".docs/notes.md" }}
 
 {{ template "chart.valuesSection" . }}
-
-{{ .Files.Get ".docs/contributions.md" }}

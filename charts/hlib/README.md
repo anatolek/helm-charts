@@ -1,9 +1,11 @@
 # hlib
 
-![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square) ![Type: library](https://img.shields.io/badge/Type-library-informational?style=flat-square)
+![Version: 0.0.3](https://img.shields.io/badge/Version-0.0.3-informational?style=flat-square) ![Type: library](https://img.shields.io/badge/Type-library-informational?style=flat-square)
+[![GitHub license](https://img.shields.io/github/license/anatolek/helm-charts)](https://github.com/anatolek/helm-charts)
 
-A reusable Helm library chart that provides common Kubernetes template primitives for building consistent, maintainable charts across GT applications.
-This library eliminates code duplication by offering pre-built templates for standard Kubernetes resources including deployments, services, ingress, RBAC, jobs, and more. Charts using this library benefit from standardized configurations, predefined resource tiers, and consistent labeling patterns.
+A reusable Helm library chart that provides common Kubernetes template primitives for building consistent, maintainable charts across applications.
+This library eliminates code duplication by offering pre-built templates for standard Kubernetes resources including deployments, services, ingress, RBAC, jobs, and more.
+Charts using this library benefit from standardized configurations, predefined resource tiers, and consistent labeling patterns.
 
 ## Requirements
 
@@ -11,91 +13,6 @@ Kubernetes: `>=1.32.0-0`
 
 The library may include new resource parameters that are recently added, enabled by default, and marked as at least a beta feature.
 Also, some old parameters and API versions may be deprecated and their support removed from the library.
-
-## Getting started
-
-To properly manage your Helm chart and its dependencies,
-you will need to configure the Git repository and adjust CI pipeline.
-
-### Git Configuration:
-
-- `Chart.yaml`: To include `hlib` dependency, it is needed to add a dependencies section to this file, for example
-
-    ```yaml
-    apiVersion: v2
-    description: Helm chart to deploy microservice
-    name: Microservice
-    version: 1.0.0
-    dependencies:
-      - name: hlib
-        version: <desired_library_version>
-        repository: https://github.com/anatolek/hlib
-    ```
-
-- `.helmignore`: It is important to exclude unnecessary files and directories from your chart package.
-  Add it to the helm chart folder.
-
-  ```text
-  # Patterns to ignore when building packages.
-  # This supports shell glob matching, relative path matching, and
-  # negation (prefixed with !). Only one pattern per line.
-  .DS_Store
-  # Common VCS dirs
-  .git/
-  .gitignore
-  .bzr/
-  .bzrignore
-  .hg/
-  .hgignore
-  .svn/
-  # Common backup files
-  *.swp
-  *.bak
-  *.tmp
-  *.orig
-  *~
-  # Helm
-  .helmignore
-  # Various IDEs
-  .project
-  .idea/
-  *.tmproj
-  .vscode/
-  ```
-
-- `.gitignore`: It is important to include the `charts/` in this file to avoid including unnecessary duplicate content in a git repository.
-  This file is usually located in the root of the repository.
-
-  ```text
-  # .gitignore
-  charts/
-  ```
-
-- `Chart.lock`: It locks the versions of the dependencies.
-  Run `helm dependency update` to generate this file, and then commit it to your Git repository.
-
-### CI Pipeline Configuration:
-
-Issue the following commands to add the Helm repository that contains the library chart, update dependencies, and push chart artifact:
-
-```shell
-helm lint <helm_chart_location>  # optionally
-helm repo add hlib https://github.com/anatolek/hlib
-helm dependency build <helm_chart_location>
-helm package <helm_chart_location>
-```
-
-#### `helm dependency` commands explanation
-
-| Command                  | Purpose                                               | Modifies `Chart.lock`? | When to Use                                                                   |
-|--------------------------|-------------------------------------------------------|------------------------|-------------------------------------------------------------------------------|
-| `helm dependency update` | Resolves and downloads dependencies from `Chart.yaml` | ✅ Yes                  | When you add or change dependencies in `Chart.yaml`                           |
-| `helm dependency build`  | Builds the `charts/` directory from `Chart.lock`      | ❌ No                   | When you already have a `Chart.lock` and want to rebuild dependencies exactly |
-
-### Template Usage
-
-After all the settings are done, you can start using the basic templates, variables, and helper functions defined in the GT library.
-Some examples are described in the `examples/` folder.
 
 ## Predefined variables
 
@@ -127,7 +44,7 @@ The override values take precedence over the base.
 
 **Usage:**
 
-```go
+```handlebars
 {{ include "hlib.util.merge" (dict "override" "template.override" "base" "template.base" "context" .) }}
 ```
 
@@ -218,7 +135,7 @@ Entries with a value of `<no value>` or empty/null will be skipped.
 
 **Usage:**
 
-```go
+```handlebars
 {{ include "hlib.util.renderEnvVars" (dict "env" .Values.env "context" .) }}
 ```
 
@@ -260,7 +177,7 @@ ghcr.io/myteam/myapp:2.0.1
 
 **Usage:**
 
-```go
+```handlebars
 {{ include "hlib.util.image" (dict "imageRoot" .Values.path.to.the.image "global" .Values.global "chart" .Chart) }}
 ```
 
@@ -286,12 +203,12 @@ This template evaluates a string or YAML object as a Helm template using the `tp
 **Examples:**
 
 1. Rendering a plain templated string:
-   ```go
+   ```handlebars
    {{ include "hlib.util.tplrender" (dict "value" .Values.path.to.the.Value "context" $) }}
    ```
 
 2. Rendering YAML with templates and a scope:
-   ```go
+   ```handlebars
    {{ include "hlib.util.tplrender" (dict "value" .Values.path.to.the.Value "context" $ "scope" $app) }}
    ```
 
@@ -307,7 +224,7 @@ This template renders prefixed Kafka values either as:
 
    Example:
 
-   ```go
+   ```handlebars
    {{ include "hlib.util.springKafkaValues" (dict "prefix" "spring.kafka.listener.concurrency" "values" "3") }}
    ```
 
@@ -321,7 +238,7 @@ This template renders prefixed Kafka values either as:
 
    Example:
 
-   ```go
+   ```handlebars
    {{ include "hlib.util.springKafkaValues" (dict "prefix" "spring.kafka" "values" "listener.concurrency=3;consumer.auto-offset-reset=earliest") }}
    ```
 
@@ -338,7 +255,7 @@ A default message string to be used when checking for a required value
 
 **Usage:**
 
-```go
+```handlebars
 {{- $requiredMsg := include "hlib.default-check-required-msg" $ -}}
 {{ required (printf $requiredMsg "SOME.VALUE.NAME") .Values.some.value }}
 ```
@@ -353,7 +270,7 @@ Creates Kubernetes container specification.
 
 Include within your controller template (e.g., deployment):
 
-```go
+```handlebars
 containers:
 - {{- include "hlib.container" (dict "context" . "values" .Values.container) }}
 ```
@@ -362,7 +279,7 @@ Add the following values
 
 ```yaml
 container:
-  resourceTier: "M"
+  # resourceTier: "M"
   image:
     repository: busybox
 ```
@@ -380,14 +297,14 @@ container:
 
 You can assign container values to `env` parameter directly, e.g.
 
-```go
+```handlebars
 containers:
 - {{- include "hlib.container" (dict "context" . "env" (fromYaml "FOO: true\nBAR: OK")) }}
 ```
 
 or as a rendered template
 
-```go
+```handlebars
 ...
 {{- $env := fromYaml (include "container.env" .) -}}
 spec:
@@ -438,7 +355,7 @@ Custom resources can be configured when `container.resourceTier` is not used.
 The changes can only be added to the container base template via `override` parameter.
 For example, if it is needed to add a secret resource as input variables for container:
 
-```go
+```handlebars
 {{- include "hlib.deployment" (dict "context" . "override" "app.deployment") -}}
 
 {{- define "app.deployment" -}}
@@ -468,7 +385,7 @@ By default, only one container is deployed due to the complexity of implementing
 
 Include this template in your chart's `templates/deployment.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.deployment" (dict "context" . "values" .Values.deployment) }}
 ```
 
@@ -477,7 +394,7 @@ Add the following values
 ```yaml
 deployment:
   container:
-    resourceTier: "S"
+    # resourceTier: "S"
     port: 8080
     image:
       repository: nginx
@@ -502,7 +419,7 @@ Used to override the configuration path of resources on which it depends.
 | `autoscaling`    | Auto-scaling status (disables replicas when enabled) | `.Values.autoscaling`    |
 | `serviceAccount` | Service account name injection                       | `.Values.serviceAccount` |
 
-```go
+```handlebars
 {{- $dependencies := dict "autoscaling" .Values.newAutoscaling "serviceAccount" .Values.newServiceAccount -}}
 {{- include "hlib.deployment" (dict "context" . "dependencies" $dependencies) }}
 ```
@@ -511,12 +428,12 @@ Used to override the configuration path of resources on which it depends.
 
 Provide a template name to `envTpl` that outputs environment variables in valid YAML format:
 
-```go
+```handlebars
 {{- include "hlib.deployment" (dict "context" . "envTpl" "your.env.template") }}
 ```
 
 Example template (`templates/_env.yaml`):
-```go
+```handlebars
 {{- define "your.env.template" -}}
 - name: ENV_VAR
   value: "production"
@@ -534,7 +451,7 @@ ENV_VAR: "production"
 If there is no need to make any changes to the container,
 the changes can only be added to the deployment base template via `override` parameter as follows:
 
-```go
+```handlebars
 {{- include "hlib.deployment" (dict "context" . "override" "app.deployment" "envTpl" "app.deployment.container.env") -}}
 
 {{- define "app.deployment" -}}
@@ -562,7 +479,7 @@ By default, only one container is deployed due to the complexity of implementing
 
 Include this template in your chart's `templates/cron-job.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.cronJob" (dict "context" . "values" .Values.cronJob) }}
 ```
 
@@ -572,7 +489,7 @@ Add the following values
 cronJob:
   schedule: "* * * * *"
   container:
-    resourceTier: "S"
+    # resourceTier: "S"
     image:
       repository: busybox
 ```
@@ -606,7 +523,7 @@ Used to override the configuration path of resources on which it depends.
 |------------------|------------------------------------------------------|--------------------------|
 | `serviceAccount` | Service account name injection                       | `.Values.serviceAccount` |
 
-```go
+```handlebars
 {{- $dependencies := dict "serviceAccount" .Values.newServiceAccount -}}
 {{- include "hlib.cronJob" (dict "context" . "dependencies" $dependencies) }}
 ```
@@ -615,12 +532,12 @@ Used to override the configuration path of resources on which it depends.
 
 Provide a template name to `envTpl` that outputs environment variables in valid YAML format:
 
-```go
+```handlebars
 {{- include "hlib.cronJob" (dict "context" . "envTpl" "your.env.template") }}
 ```
 
 Example template (`templates/_env.yaml`):
-```go
+```handlebars
 {{- define "your.env.template" -}}
 - name: ENV_VAR
   value: "production"
@@ -638,7 +555,7 @@ ENV_VAR: "production"
 If there is no need to make any changes to the container,
 the changes can only be added to the CronJob base template via `override` parameter as follows:
 
-```go
+```handlebars
 {{- include "hlib.cronJob" (dict "context" . "override" "app.cronJob" "envTpl" "app.cronJob.container.env") -}}
 
 {{- define "app.cronJob" -}}
@@ -666,7 +583,7 @@ By default, only one container is deployed due to the complexity of implementing
 
 Include this template in your chart's `templates/job.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.job" (dict "context" . "values" .Values.job) }}
 ```
 
@@ -675,7 +592,7 @@ Add the following values
 ```yaml
 job:
   container:
-    resourceTier: "S"
+    # resourceTier: "S"
     port: 8080
     image:
       repository: nginx
@@ -711,7 +628,7 @@ Used to override the configuration path of resources on which it depends.
 |------------------|------------------------------------------------------|--------------------------|
 | `serviceAccount` | Service account name injection                       | `.Values.serviceAccount` |
 
-```go
+```handlebars
 {{- $dependencies := dict "serviceAccount" .Values.newServiceAccount -}}
 {{- include "hlib.job" (dict "context" . "dependencies" $dependencies) }}
 ```
@@ -720,12 +637,12 @@ Used to override the configuration path of resources on which it depends.
 
 Provide a template name to `envTpl` that outputs environment variables in valid YAML format:
 
-```go
+```handlebars
 {{- include "hlib.job" (dict "context" . "envTpl" "your.env.template") }}
 ```
 
 Example template (`templates/_env.yaml`):
-```go
+```handlebars
 {{- define "your.env.template" -}}
 - name: ENV_VAR
   value: "production"
@@ -743,7 +660,7 @@ ENV_VAR: "production"
 If there is no need to make any changes to the container,
 the changes can only be added to the job base template via `override` parameter as follows:
 
-```go
+```handlebars
 {{- include "hlib.job" (dict "context" . "override" "app.job" "envTpl" "app.job.container.env") -}}
 
 {{- define "app.job" -}}
@@ -766,7 +683,7 @@ By default, a service with type `ClusterIP` is created on port 80.
 
 Include this template in your chart's `templates/service.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.service" (dict "context" .) }}
 ```
 
@@ -795,7 +712,7 @@ service:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.service" (dict "context" . "override" "app.service") -}}
 
 {{- define "app.service" -}}
@@ -824,7 +741,7 @@ Creates Kubernetes ServiceAccount resources.
 
 Include this template in your chart's `templates/serviceaccount.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.serviceAccount" (dict "context" .) }}
 ```
 
@@ -840,7 +757,7 @@ Include this template in your chart's `templates/serviceaccount.yaml`:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.serviceAccount" (dict "context" . "override" "app.sa") -}}
 
 {{- define "app.sa" -}}
@@ -865,7 +782,7 @@ annotations:
 
 Include this template in your chart's `templates/secret.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.secret" (dict "context" .) }}
 ```
 
@@ -881,7 +798,7 @@ Include this template in your chart's `templates/secret.yaml`:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.secret" (dict "context" . "override" "app.secret") -}}
 
 {{- define "app.secret" -}}
@@ -906,7 +823,7 @@ annotations:
 
 Include this template in your chart's `templates/configmap.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.configMap" (dict "context" .) }}
 ```
 
@@ -922,7 +839,7 @@ Include this template in your chart's `templates/configmap.yaml`:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.configMap" (dict "context" . "override" "app.configMap") -}}
 
 {{- define "app.configMap" -}}
@@ -947,7 +864,7 @@ Creates Kubernetes Ingress manifest.
 
 Include this template in your chart's `templates/ingress.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.ingress" (dict "context" .) }}
 ```
 
@@ -986,7 +903,7 @@ Used to override the configuration path of resources on which it depends.
 |------------|------------------------|-------------------|
 | `service`  | Service name injection | `.Values.service` |
 
-```go
+```handlebars
 {{- $dependencies := dict "service" .Values.newService -}}
 {{- include "hlib.ingress" (dict "context" . "dependencies" $dependencies) }}
 ```
@@ -996,7 +913,7 @@ Used to override the configuration path of resources on which it depends.
 If there is no need to make any changes to the container,
 the changes can only be added to the ingress base template via `override` parameter as follows:
 
-```go
+```handlebars
 {{- include "hlib.ingress" (dict "context" . "override" "app.ingress") -}}
 
 {{- define "app.ingress" -}}
@@ -1013,7 +930,7 @@ Creates Kubernetes HorizontalPodAutoscaler resources.
 
 Include this template in your chart's `templates/hpa.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.hpa" (dict "context" .) }}
 ```
 
@@ -1034,7 +951,7 @@ Used to override the configuration path of resources on which it depends.
 |--------------|----------------------|----------------------|
 | `deployment` | Deploymnet reference | `.Values.deployment` |
 
-```go
+```handlebars
 {{- $dependencies := dict "deployment" .Values.newDeployment -}}
 {{- include "hlib.hpa" (dict "context" . "dependencies" $dependencies) }}
 ```
@@ -1043,7 +960,7 @@ Used to override the configuration path of resources on which it depends.
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.hpa" (dict "context" . "override" "app.hpa") -}}
 
 {{- define "app.hpa" -}}
@@ -1061,7 +978,7 @@ By default, it is established that only `1` pod may be unavailable after the evi
 
 Include this template in your chart's `templates/pdb.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.pdb" (dict "context" .) }}
 ```
 
@@ -1077,7 +994,7 @@ Include this template in your chart's `templates/pdb.yaml`:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.pdb" (dict "context" . "override" "app.pdb") -}}
 
 {{- define "app.pdb" -}}
@@ -1096,7 +1013,7 @@ Creates Kubernetes Role resources.
 
 Include this template in your chart's `templates/role.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.role" (dict "context" .) }}
 ```
 
@@ -1112,7 +1029,7 @@ Include this template in your chart's `templates/role.yaml`:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.role" (dict "context" . "override" "app.role") -}}
 
 {{- define "app.role" -}}
@@ -1132,7 +1049,7 @@ By default, only one binding is created per service account.
 
 Include this template in your chart's `templates/role-binding.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.roleBinding" (dict "context" .) }}
 ```
 
@@ -1154,7 +1071,7 @@ Used to override the configuration path of resources on which it depends.
 | `role`           | Role reference            | `.Values.rbac.role`      |
 | `serviceAccount` | Service account reference | `.Values.serviceAccount` |
 
-```go
+```handlebars
 {{- $dependencies := dict "role" .Values.newRole "serviceAccount" .Values.newServiceAccount -}}
 {{- include "hlib.deployment" (dict "context" . "dependencies" $dependencies) }}
 ```
@@ -1163,7 +1080,7 @@ Used to override the configuration path of resources on which it depends.
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.roleBinding" (dict "context" . "override" "app.roleBinding") -}}
 
 {{- define "app.roleBinding" -}}
@@ -1180,7 +1097,7 @@ Creates Kubernetes ClusterRole resources.
 
 Include this template in your chart's `templates/cluster-role.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.clusterRole" (dict "context" .) }}
 ```
 
@@ -1208,7 +1125,7 @@ rbac:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.clusterRole" (dict "context" . "override" "app.clusterRole") -}}
 
 {{- define "app.clusterRole" -}}
@@ -1228,7 +1145,7 @@ By default, only one binding is created per service account.
 
 Include this template in your chart's `templates/cluster-role-binding.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.clusterRoleBinding" (dict "context" .) }}
 ```
 
@@ -1250,7 +1167,7 @@ Used to override the configuration path of resources on which it depends.
 | `clusterRole`    | Cluster role reference    | `.Values.rbac.clusterRole` |
 | `serviceAccount` | Service account reference | `.Values.serviceAccount`   |
 
-```go
+```handlebars
 {{- $dependencies := dict "clusterRole" .Values.newClusterRole "serviceAccount" .Values.newServiceAccount -}}
 {{- include "hlib.deployment" (dict "context" . "dependencies" $dependencies) }}
 ```
@@ -1259,7 +1176,7 @@ Used to override the configuration path of resources on which it depends.
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.clusterRoleBinding" (dict "context" . "override" "app.clusterRoleBinding") -}}
 
 {{- define "app.clusterRoleBinding" -}}
@@ -1270,7 +1187,7 @@ metadata:
 
 ### `hlib.diagnostic` template
 
-Creates multiple Kubernetes resources that help developers provide extended access to the EKS cluster for debugging.
+Creates multiple Kubernetes resources that help developers provide extended access to the Kubernetes cluster for debugging.
 
 #### Providing access
 
@@ -1347,7 +1264,7 @@ Provides post-installation information for users, including access instructions 
 
 Include this template in your chart's `templates/_NOTES.txt`:
 
-```go
+```handlebars
 {{- include "hlib.notes.chartInfo" (dict "context" .) }}
 
 {{- include "hlib.notes.releaseInfo" (dict "context" .) }}
@@ -1361,7 +1278,7 @@ Include this template in your chart's `templates/_NOTES.txt`:
 
 #### Chart Information
 
-```go
+```handlebars
 {{- include "hlib.notes.chartInfo" (dict "context" .) }}
 ```
 
@@ -1372,12 +1289,12 @@ CHART NAME: my-app
 CHART VERSION: 1.2.3
 APP VERSION: v4.5.0
 SOURCES:
-  - https://gitlab.com/my-org/my-app
+  - https://github.com/my-org/my-app
 ```
 
 #### Release Information
 
-```go
+```handlebars
 {{- include "hlib.notes.releaseInfo" (dict "context" .) }}
 ```
 
@@ -1391,22 +1308,22 @@ REVISION: 2
 
 #### Application Access Instructions
 
-```go
+```handlebars
 {{- include "hlib.notes.accessAppInfo" (dict "context" .) }}
 ```
 
 Output Depends on Configuration:
 
-| Service Type  | 	Example Output                                             |
+| Service Type  | 	Example Output                                            |
 |---------------|-------------------------------------------------------------|
 | Ingress       | Access application via Ingress: https://app.example.com/api |
-| NodePort	     | Provides kubectl commands to retrieve node IP and ports     |
-| LoadBalancer	 | Provides commands to get LB IP and port                     |
+| NodePort	    | Provides kubectl commands to retrieve node IP and ports     |
+| LoadBalancer	| Provides commands to get LB IP and port                     |
 | ClusterIP     | Provides port-forward command for local access              |
 
 #### Diagnostic Mode Setup
 
-```go
+```handlebars
 {{- include "hlib.notes.diagnosticMode" (dict "context" .) }}
 ```
 
@@ -1425,7 +1342,7 @@ CLUSTER_NAME=...
 
 Override Service/Ingress References
 
-```go
+```handlebars
 {{- include "hlib.notes.accessAppInfo" (dict "context" . "service" .Values.customService "ingress" .Values.specialIngress) }}
 ```
 
@@ -1687,28 +1604,3 @@ Override Service/Ingress References
 |-----|------|---------|-------------|
 | fullnameOverride | tpl/string | `""` | Override the chart full name. |
 | nameOverride | tpl/string | `""` | Override the chart full name from `{{ Release.Name }}-{{ .Chart.Name }}` to `{{ Release.Name }}-{{ .Values.nameOverride }}`. |
-
-## Contributions
-
-### Versioning rules
-
-Code version contains three positions `X.Y.Z`
-
-`Z` - should be increased **for fixes**
-
-`Y` - should be increased for code update with **adding new features**
-
-`X` - should be increased if update **breaks backward compatibility**
-
-### Documentation-related changes
-
-*README.md* files are generated using a [helm-docs](https://github.com/norwoodj/helm-docs/tree/master) utility.
-Don't try to add changes directly.
-
-```shell
-helm-docs --skip-version-footer
-```
-
-- Add documentation on variables to `values.yaml`
-- A new section should be added as a separate file to `.docs/`, and then linked into the template `README.md.gotmpl`.
-

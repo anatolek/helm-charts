@@ -6,7 +6,7 @@ Creates Kubernetes container specification.
 
 Include within your controller template (e.g., deployment):
 
-```go
+```handlebars
 containers:
 - {{- include "hlib.container" (dict "context" . "values" .Values.container) }}
 ```
@@ -15,7 +15,7 @@ Add the following values
 
 ```yaml
 container:
-  resourceTier: "M"
+  # resourceTier: "M"
   image:
     repository: busybox
 ```
@@ -33,14 +33,14 @@ container:
 
 You can assign container values to `env` parameter directly, e.g.
 
-```go
+```handlebars
 containers:
 - {{- include "hlib.container" (dict "context" . "env" (fromYaml "FOO: true\nBAR: OK")) }}
 ```
 
 or as a rendered template
 
-```go
+```handlebars
 ...
 {{- $env := fromYaml (include "container.env" .) -}}
 spec:
@@ -91,7 +91,7 @@ Custom resources can be configured when `container.resourceTier` is not used.
 The changes can only be added to the container base template via `override` parameter.
 For example, if it is needed to add a secret resource as input variables for container:
 
-```go
+```handlebars
 {{- include "hlib.deployment" (dict "context" . "override" "app.deployment") -}}
 
 {{- define "app.deployment" -}}

@@ -7,7 +7,7 @@ By default, only one container is deployed due to the complexity of implementing
 
 Include this template in your chart's `templates/cron-job.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.cronJob" (dict "context" . "values" .Values.cronJob) }}
 ```
 
@@ -17,7 +17,7 @@ Add the following values
 cronJob:
   schedule: "* * * * *"
   container:
-    resourceTier: "S"
+    # resourceTier: "S"
     image:
       repository: busybox
 ```
@@ -51,7 +51,7 @@ Used to override the configuration path of resources on which it depends.
 |------------------|------------------------------------------------------|--------------------------|
 | `serviceAccount` | Service account name injection                       | `.Values.serviceAccount` |
 
-```go
+```handlebars
 {{- $dependencies := dict "serviceAccount" .Values.newServiceAccount -}}
 {{- include "hlib.cronJob" (dict "context" . "dependencies" $dependencies) }}
 ```
@@ -60,12 +60,12 @@ Used to override the configuration path of resources on which it depends.
 
 Provide a template name to `envTpl` that outputs environment variables in valid YAML format:
 
-```go
+```handlebars
 {{- include "hlib.cronJob" (dict "context" . "envTpl" "your.env.template") }}
 ```
 
 Example template (`templates/_env.yaml`):
-```go
+```handlebars
 {{- define "your.env.template" -}}
 - name: ENV_VAR
   value: "production"
@@ -83,7 +83,7 @@ ENV_VAR: "production"
 If there is no need to make any changes to the container,
 the changes can only be added to the CronJob base template via `override` parameter as follows:
 
-```go
+```handlebars
 {{- include "hlib.cronJob" (dict "context" . "override" "app.cronJob" "envTpl" "app.cronJob.container.env") -}}
 
 {{- define "app.cronJob" -}}

@@ -6,7 +6,7 @@ Creates Kubernetes Role resources.
 
 Include this template in your chart's `templates/role.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.role" (dict "context" .) }}
 ```
 
@@ -22,7 +22,7 @@ Include this template in your chart's `templates/role.yaml`:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.role" (dict "context" . "override" "app.role") -}}
 
 {{- define "app.role" -}}

@@ -7,7 +7,7 @@ By default, only one container is deployed due to the complexity of implementing
 
 Include this template in your chart's `templates/job.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.job" (dict "context" . "values" .Values.job) }}
 ```
 
@@ -16,7 +16,7 @@ Add the following values
 ```yaml
 job:
   container:
-    resourceTier: "S"
+    # resourceTier: "S"
     port: 8080
     image:
       repository: nginx
@@ -52,7 +52,7 @@ Used to override the configuration path of resources on which it depends.
 |------------------|------------------------------------------------------|--------------------------|
 | `serviceAccount` | Service account name injection                       | `.Values.serviceAccount` |
 
-```go
+```handlebars
 {{- $dependencies := dict "serviceAccount" .Values.newServiceAccount -}}
 {{- include "hlib.job" (dict "context" . "dependencies" $dependencies) }}
 ```
@@ -61,12 +61,12 @@ Used to override the configuration path of resources on which it depends.
 
 Provide a template name to `envTpl` that outputs environment variables in valid YAML format:
 
-```go
+```handlebars
 {{- include "hlib.job" (dict "context" . "envTpl" "your.env.template") }}
 ```
 
 Example template (`templates/_env.yaml`):
-```go
+```handlebars
 {{- define "your.env.template" -}}
 - name: ENV_VAR
   value: "production"
@@ -84,7 +84,7 @@ ENV_VAR: "production"
 If there is no need to make any changes to the container,
 the changes can only be added to the job base template via `override` parameter as follows:
 
-```go
+```handlebars
 {{- include "hlib.job" (dict "context" . "override" "app.job" "envTpl" "app.job.container.env") -}}
 
 {{- define "app.job" -}}

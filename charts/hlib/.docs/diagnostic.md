@@ -1,6 +1,6 @@
 ### `hlib.diagnostic` template
 
-Creates multiple Kubernetes resources that help developers provide extended access to the EKS cluster for debugging.
+Creates multiple Kubernetes resources that help developers provide extended access to the Kubernetes cluster for debugging.
 
 #### Providing access
 

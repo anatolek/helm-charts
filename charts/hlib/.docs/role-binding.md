@@ -7,7 +7,7 @@ By default, only one binding is created per service account.
 
 Include this template in your chart's `templates/role-binding.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.roleBinding" (dict "context" .) }}
 ```
 
@@ -29,7 +29,7 @@ Used to override the configuration path of resources on which it depends.
 | `role`           | Role reference            | `.Values.rbac.role`      |
 | `serviceAccount` | Service account reference | `.Values.serviceAccount` |
 
-```go
+```handlebars
 {{- $dependencies := dict "role" .Values.newRole "serviceAccount" .Values.newServiceAccount -}}
 {{- include "hlib.deployment" (dict "context" . "dependencies" $dependencies) }}
 ```
@@ -38,7 +38,7 @@ Used to override the configuration path of resources on which it depends.
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.roleBinding" (dict "context" . "override" "app.roleBinding") -}}
 
 {{- define "app.roleBinding" -}}

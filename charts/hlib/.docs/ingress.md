@@ -6,7 +6,7 @@ Creates Kubernetes Ingress manifest.
 
 Include this template in your chart's `templates/ingress.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.ingress" (dict "context" .) }}
 ```
 
@@ -45,7 +45,7 @@ Used to override the configuration path of resources on which it depends.
 |------------|------------------------|-------------------|
 | `service`  | Service name injection | `.Values.service` |
 
-```go
+```handlebars
 {{- $dependencies := dict "service" .Values.newService -}}
 {{- include "hlib.ingress" (dict "context" . "dependencies" $dependencies) }}
 ```
@@ -55,7 +55,7 @@ Used to override the configuration path of resources on which it depends.
 If there is no need to make any changes to the container,
 the changes can only be added to the ingress base template via `override` parameter as follows:
 
-```go
+```handlebars
 {{- include "hlib.ingress" (dict "context" . "override" "app.ingress") -}}
 
 {{- define "app.ingress" -}}

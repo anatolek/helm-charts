@@ -14,7 +14,7 @@ annotations:
 
 Include this template in your chart's `templates/secret.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.secret" (dict "context" .) }}
 ```
 
@@ -30,7 +30,7 @@ Include this template in your chart's `templates/secret.yaml`:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.secret" (dict "context" . "override" "app.secret") -}}
 
 {{- define "app.secret" -}}

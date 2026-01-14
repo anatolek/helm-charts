@@ -8,7 +8,7 @@ By default, it is established that only `1` pod may be unavailable after the evi
 
 Include this template in your chart's `templates/pdb.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.pdb" (dict "context" .) }}
 ```
 
@@ -24,7 +24,7 @@ Include this template in your chart's `templates/pdb.yaml`:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.pdb" (dict "context" . "override" "app.pdb") -}}
 
 {{- define "app.pdb" -}}

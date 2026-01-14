@@ -14,5 +14,5 @@ To render a chart try to run:
 
 ```shell
 cd examples/<chart>
-helm install --dry-run test .
+helm template test .
 ```

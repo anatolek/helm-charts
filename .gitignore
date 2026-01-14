@@ -6,6 +6,7 @@
 
 ### VisualStudioCode ###
 .vscode/*
+.vs/*
 
 ### Vim ###
 # Swap

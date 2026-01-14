@@ -8,7 +8,7 @@ By default, a service with type `ClusterIP` is created on port 80.
 
 Include this template in your chart's `templates/service.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.service" (dict "context" .) }}
 ```
 
@@ -37,7 +37,7 @@ service:
 
 The changes can only be added to the base template via `override` parameter, e.g.:
 
-```go
+```handlebars
 {{- include "hlib.service" (dict "context" . "override" "app.service") -}}
 
 {{- define "app.service" -}}

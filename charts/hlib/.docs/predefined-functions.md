@@ -16,7 +16,7 @@ The override values take precedence over the base.
 
 **Usage:**
 
-```go
+```handlebars
 {{ include "hlib.util.merge" (dict "override" "template.override" "base" "template.base" "context" .) }}
 ```
 
@@ -107,7 +107,7 @@ Entries with a value of `<no value>` or empty/null will be skipped.
 
 **Usage:**
 
-```go
+```handlebars
 {{ include "hlib.util.renderEnvVars" (dict "env" .Values.env "context" .) }}
 ```
 
@@ -149,7 +149,7 @@ ghcr.io/myteam/myapp:2.0.1
 
 **Usage:**
 
-```go
+```handlebars
 {{ include "hlib.util.image" (dict "imageRoot" .Values.path.to.the.image "global" .Values.global "chart" .Chart) }}
 ```
 
@@ -175,12 +175,12 @@ This template evaluates a string or YAML object as a Helm template using the `tp
 **Examples:**
 
 1. Rendering a plain templated string:
-   ```go
+   ```handlebars
    {{ include "hlib.util.tplrender" (dict "value" .Values.path.to.the.Value "context" $) }}
    ```
 
 2. Rendering YAML with templates and a scope:
-   ```go
+   ```handlebars
    {{ include "hlib.util.tplrender" (dict "value" .Values.path.to.the.Value "context" $ "scope" $app) }}
    ```
 
@@ -196,7 +196,7 @@ This template renders prefixed Kafka values either as:
 
    Example:
 
-   ```go
+   ```handlebars
    {{ include "hlib.util.springKafkaValues" (dict "prefix" "spring.kafka.listener.concurrency" "values" "3") }}
    ```
 
@@ -210,7 +210,7 @@ This template renders prefixed Kafka values either as:
 
    Example:
 
-   ```go
+   ```handlebars
    {{ include "hlib.util.springKafkaValues" (dict "prefix" "spring.kafka" "values" "listener.concurrency=3;consumer.auto-offset-reset=earliest") }}
    ```
 
@@ -227,7 +227,7 @@ A default message string to be used when checking for a required value
 
 **Usage:**
 
-```go
+```handlebars
 {{- $requiredMsg := include "hlib.default-check-required-msg" $ -}}
 {{ required (printf $requiredMsg "SOME.VALUE.NAME") .Values.some.value }}
 ```

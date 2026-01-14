@@ -7,7 +7,7 @@ By default, only one container is deployed due to the complexity of implementing
 
 Include this template in your chart's `templates/deployment.yaml`:
 
-```go
+```handlebars
 {{- include "hlib.deployment" (dict "context" . "values" .Values.deployment) }}
 ```
 
@@ -16,7 +16,7 @@ Add the following values
 ```yaml
 deployment:
   container:
-    resourceTier: "S"
+    # resourceTier: "S"
     port: 8080
     image:
       repository: nginx
@@ -41,7 +41,7 @@ Used to override the configuration path of resources on which it depends.
 | `autoscaling`    | Auto-scaling status (disables replicas when enabled) | `.Values.autoscaling`    |
 | `serviceAccount` | Service account name injection                       | `.Values.serviceAccount` |
 
-```go
+```handlebars
 {{- $dependencies := dict "autoscaling" .Values.newAutoscaling "serviceAccount" .Values.newServiceAccount -}}
 {{- include "hlib.deployment" (dict "context" . "dependencies" $dependencies) }}
 ```
@@ -50,12 +50,12 @@ Used to override the configuration path of resources on which it depends.
 
 Provide a template name to `envTpl` that outputs environment variables in valid YAML format:
 
-```go
+```handlebars
 {{- include "hlib.deployment" (dict "context" . "envTpl" "your.env.template") }}
 ```
 
 Example template (`templates/_env.yaml`):
-```go
+```handlebars
 {{- define "your.env.template" -}}
 - name: ENV_VAR
   value: "production"
@@ -73,7 +73,7 @@ ENV_VAR: "production"
 If there is no need to make any changes to the container,
 the changes can only be added to the deployment base template via `override` parameter as follows:
 
-```go
+```handlebars
 {{- include "hlib.deployment" (dict "context" . "override" "app.deployment" "envTpl" "app.deployment.container.env") -}}
 
 {{- define "app.deployment" -}}
