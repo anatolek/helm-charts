@@ -35,7 +35,7 @@ jobs:
           charts_dir: charts
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          CR_KEY: Anatolii Pedchenko (GitHub Helm sing key) <anatolek@ukr.net>
+          CR_KEY: Anatolii (Helm signing GPG key) <anatolek@ukr.net>
           CR_KEYRING: keyring.gpg
           CR_PASSPHRASE_FILE: passphrase-file.txt
           CR_SIGN: true
