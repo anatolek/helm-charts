@@ -3,7 +3,7 @@ name: hlib
 description: Helm library chart for common Kubernetes templates
 type: library
 kubeVersion: '>=1.32.0-0'
-version: 0.0.3
+version: 0.1.0
 home: https://github.com/anatolek/helm-charts
 icon: https://raw.githubusercontent.com/anatolek/helm-charts/main/charts/hlib/img/icon.png
 sources:
@@ -24,9 +24,12 @@ annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/changes: |
     - kind: added
-      description: README.md is added to the chart
+      description: GPG signing key is added
   artifacthub.io/links: |
     - name: GitHub Repository
       url: https://github.com/anatolek/helm-charts
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/prerelease: "false"
+artifacthub.io/signKey: |
+    fingerprint: D47292D42D6DD778890094B6D1B4F6FD3CBAC2AF
+    url: https://anatolek.github.io/helm-charts/pgp-public-key.asc

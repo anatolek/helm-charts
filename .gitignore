@@ -34,3 +34,6 @@ Thumbs.db
 *.tmp
 .*.swp
 hlib-*.tgz
+*.asc
+*.gpg
+*.key
