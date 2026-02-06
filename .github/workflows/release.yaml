@@ -21,6 +21,11 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+      - name: Import GPG key
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY_BASE64 }}" | base64 --decode | gpg --dearmor --output keyring.gpg
+          echo "${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE_BASE64 }}" | base64 --decode > passphrase-file.txt
+
       - name: Install Helm
         uses: azure/setup-helm@v4
 
@@ -30,3 +35,7 @@ jobs:
           charts_dir: charts
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_KEY: Anatolii Pedchenko (GitHub Helm sing key) <anatolek@ukr.net>
+          CR_KEYRING: keyring.gpg
+          CR_PASSPHRASE_FILE: passphrase-file.txt
+          CR_SIGN: true
