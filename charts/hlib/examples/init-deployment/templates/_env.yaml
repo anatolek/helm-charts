@@ -1,0 +1,3 @@
+{{- define "init.deployment.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+{{- end -}}
