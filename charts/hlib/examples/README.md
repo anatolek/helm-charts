@@ -8,6 +8,7 @@
 | `cronjob`              | Create CronJob                                                    |
 | `multiple-deployments` | Deploying multiple deployments with one chart                     |
 | `simple-deployment`    | Complete chart for simple application                             |
+| `init-deployment`      | Simple chart, a good start for deploying a new application |
 | `volumes`              | Mounting secrets and configmaps as volumes                        |
 
 To render a chart try to run:

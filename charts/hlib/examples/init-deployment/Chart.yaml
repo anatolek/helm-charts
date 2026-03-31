@@ -1,0 +1,13 @@
+apiVersion: v2
+appVersion: "1.29"
+description: A Helm chart for deploying Init application
+keywords:
+- init
+name: init
+type: application
+version: "1.29"
+icon: https://raw.githubusercontent.com/anatolek/helm-charts/main/charts/hlib/img/icon.png
+dependencies:
+- name: hlib
+  version: ">= 0.0.0"
+  repository: https://anatolek.github.io/helm-charts
