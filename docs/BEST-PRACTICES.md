@@ -42,7 +42,7 @@ This should be done by adding the special [TZ](https://www.gnu.org/software/libc
 ```yaml
 env:
   - name: TZ
-    value: {{ ((.Values.gloal).timezone) }}
+    value: {{ ((.Values.global).timezone) }}
 ```
 
 ## Describe new variables
@@ -252,3 +252,7 @@ stringData:
   JWT_SECRET: {{ .Values.jwt.secret }}
 {{- end -}}
 ```
+
+## References
+
+- [Helm Charts Looked Simple Until I Actually Used Them](https://medium.com/@anatolek46/helm-charts-looked-simple-until-i-actually-used-them-4fc3da802abb)

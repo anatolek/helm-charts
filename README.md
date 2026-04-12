@@ -14,6 +14,32 @@ Detailed documentation for the library is here [README.md](/charts/hlib/README.m
 
 It is also recommended to familiarize yourself with [BEST-PRACTICES.md](/docs/BEST-PRACTICES.md) when working with helm charts.
 
+## Choosing a Helm Library
+
+If you are migrating an application to Kubernetes or building a new one and don't want to spend weeks learning
+Helm templating best practices, a library chart can save significant time.
+Below is an honest comparison of popular options to help you decide which fits your situation.
+
+### Feature Comparison
+
+| Aspect                                                                                         | [hlib](https://artifacthub.io/packages/helm/hlib/hlib)                                                                                      | [Bitnami Common](https://artifacthub.io/packages/helm/bitnami/common)   | [bjw-s Common](https://github.com/bjw-s-labs/helm-charts/tree/main/charts/library/common) |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **Full resource templates** (Deployment, Service, Ingress, Job, CronJob, RBAC, HPA, PDB, etc.) | Yes — one-liner includes generate complete manifests                                                                                        | No — provides helper functions only; you still write manifests yourself | Yes — declarative resource definitions via values                                         |
+| **Customization model**                                                                        | Template-level: consumer writes a named Go template with only the fields to change; library deep-merges it with the base (default template) | Helper functions only — consumer controls the full manifest             | Values-level only: everything configured through `values.yaml`; no template access        |
+| **Can inject arbitrary / new K8s fields**                                                      | Yes — override template can add any field, even ones the library doesn't know about                                                         | Yes — consumer owns the manifest                                        | No — only fields exposed by the values schema are available                               |
+| **Best-practices documentation**                                                               | Dedicated best-practices guide + examples                                                                                                   | Relies on Bitnami ecosystem docs                                        | Getting-started guide                                                                     |
+| **Consumer writes**                                                                            | Minimal override templates (Go/YAML) + `values.yaml`                                                                                        | Full Kubernetes manifests + helper includes                             | `values.yaml` only — no templates needed                                                  |
+| **Flexibility ceiling**                                                                        | Very high — anything expressible in Kubernetes YAML                                                                                         | Unlimited — full control of manifests                                   | Bounded by what the values schema exposes                                                 |
+| **Community size**                                                                             | Small (new project)                                                                                                                         | Very large (part of Bitnami ecosystem)                                  | Medium (popular in homelab/self-hosting)                                                  |
+
+### When to Choose Each
+
+| Choose             | When                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **hlib**           | You want to deploy standard workloads (Deployments, Jobs, CronJobs) to a cluster with minimal boilerplate. You prefer one-liner template includes that produce complete manifests with sensible defaults, built-in resource tiers, and don't want to write Kubernetes YAML from scratch. Good fit for teams standardizing Helm charts across multiple services. |
+| **Bitnami Common** | You are already using **Bitnami application charts** (PostgreSQL, Redis, Kafka, etc.) and want consistency with their ecosystem. Note: Bitnami Common provides helper functions (labels, names, images, capabilities), not full resource templates — you still write your own manifests.                                                                        |
+| **bjw-s Common**   | You need a highly **flexible, values-driven** approach where almost everything is configured through `values.yaml` rather than template files. Popular choice for **homelab and self-hosting** setups where a single chart definition deploys many different applications.                                                                                      |
+
 ## Getting started
 
 ### Git Configuration:
@@ -91,7 +117,6 @@ You can take them as a basis.
 Issue the following commands to add the Helm repository that contains the library chart, and update dependencies:
 
 ```shell
-helm lint <helm_chart_location>  # optionally
 helm repo add hlib https://anatolek.github.io/helm-charts
 helm dependency build <helm_chart_location>
 helm package <helm_chart_location>
