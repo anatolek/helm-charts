@@ -17,7 +17,7 @@ Add the following values
 cronJob:
   schedule: "* * * * *"
   container:
-    # resourceTier: "S"
+    # resourceTier: "m100Mi-c100m"
     image:
       repository: busybox
 ```

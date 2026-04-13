@@ -70,7 +70,7 @@
                             "type": "object"
                         },
                         "resourceTier": {
-                            "description": "Resource tier (S, M, L, XL, 2XL, 3XL, 4XL, 5XL). it takes precedence over the \"container.resources\".",
+                            "description": "Unified resource tier in format m\u003cmemory\u003e-c\u003ccpu\u003e (e.g., m100Mi-c100m, M1Gi-C1). Used as a fallback when \"container.resources\" is not set.",
                             "type": "string"
                         },
                         "resources": {

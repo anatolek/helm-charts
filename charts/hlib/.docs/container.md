@@ -15,7 +15,7 @@ Add the following values
 
 ```yaml
 container:
-  # resourceTier: "M"
+  # resourceTier: "m250Mi-c250m"
   image:
     repository: busybox
 ```
@@ -64,27 +64,28 @@ container:
     LOG_LEVEL: debug
 ```
 
-**Resource Tiers**
+**Resource tier (`resourceTier`)**
 
-Predefined resource profiles (avoids manual CPU/memory config):
+You can set a compact string instead of spelling out `container.resources`. The format is **`m<memory>-c<cpu>`** where the leading `m` / `c` letters are case-insensitive. Memory and CPU values must be valid Kubernetes quantities (same as in a Pod spec).
+
+Examples:
 
 ```yaml
 container:
-  resourceTier: "L"  # Options: S, M, L, XL, 2XL-5XL
+  resourceTier: "m100Mi-c100m"
 ```
 
-| Resource Tier | Request Memory | Request CPU | Request Ephemeral Storage | Limit Memory | Limit CPU | Limit Ephemeral Storage |
-|---------------|----------------|-------------|---------------------------|--------------|-----------|-------------------------|
-| S             | 100Mi          | 100m        | 50Mi                      | 100Mi        | -         | 2Gi                     |
-| M             | 250Mi          | 250m        | 50Mi                      | 250Mi        | -         | 2Gi                     |
-| L             | 500Mi          | 500m        | 50Mi                      | 500Mi        | -         | 2Gi                     |
-| XL            | 1Gi            | 1           | 50Mi                      | 1Gi          | -         | 2Gi                     |
-| 2XL           | 2Gi            | 1           | 50Mi                      | 2Gi          | -         | 2Gi                     |
-| 3XL           | 4Gi            | 2           | 50Mi                      | 4Gi          | -         | 2Gi                     |
-| 4XL           | 8Gi            | 2           | 50Mi                      | 8Gi          | -         | 2Gi                     |
-| 5XL           | 16Gi           | 4           | 50Mi                      | 16Gi         | -         | 2Gi                     |
+```yaml
+container:
+  resourceTier: "M100M-C1"
+```
 
-Custom resources can be configured when `container.resourceTier` is not used.
+Rendered resources:
+
+- **Requests:** `memory` and `cpu` from the string; `ephemeral-storage` is always `50Mi`.
+- **Limits:** `memory` matches requests; `ephemeral-storage` is always `2Gi`. **CPU is not set in limits** (only in requests).
+
+**Precedence:** If `container.resources.requests` is set, that block is used and `resourceTier` is ignored. Use either full `container.resources` or `resourceTier`, or set resources when you need to override a tier for a specific environment.
 
 #### Advanced: Template Overrides
 

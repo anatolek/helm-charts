@@ -17,7 +17,7 @@ Do not specify resources in the default chart `values.yaml` to avoid difficultie
 ```yaml
 deployment:
   container:
-    resourceTier: "S"
+    resourceTier: "m100Mi-c100m"
 ```
 
  :x:
