@@ -1,11 +1,11 @@
 # hlib
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: library](https://img.shields.io/badge/Type-library-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: library](https://img.shields.io/badge/Type-library-informational?style=flat-square)
 [![GitHub license](https://img.shields.io/github/license/anatolek/helm-charts)](https://github.com/anatolek/helm-charts)
 
 A reusable Helm library chart that provides common Kubernetes template primitives for building consistent, maintainable charts across applications.
 This library eliminates code duplication by offering pre-built templates for standard Kubernetes resources including deployments, services, ingress, RBAC, jobs, and more.
-Charts using this library benefit from standardized configurations, predefined resource tiers, and consistent labeling patterns.
+Charts using this library benefit from standardized configurations, unified resource tiers, and consistent labeling patterns.
 
 ## Requirements
 
@@ -279,7 +279,7 @@ Add the following values
 
 ```yaml
 container:
-  # resourceTier: "M"
+  # resourceTier: "m250Mi-c250m"
   image:
     repository: busybox
 ```
@@ -328,27 +328,28 @@ container:
     LOG_LEVEL: debug
 ```
 
-**Resource Tiers**
+**Resource tier (`resourceTier`)**
 
-Predefined resource profiles (avoids manual CPU/memory config):
+You can set a compact string instead of spelling out `container.resources`. The format is **`m<memory>-c<cpu>`** where the leading `m` / `c` letters are case-insensitive. Memory and CPU values must be valid Kubernetes quantities (same as in a Pod spec).
+
+Examples:
 
 ```yaml
 container:
-  resourceTier: "L"  # Options: S, M, L, XL, 2XL-5XL
+  resourceTier: "m100Mi-c100m"
 ```
 
-| Resource Tier | Request Memory | Request CPU | Request Ephemeral Storage | Limit Memory | Limit CPU | Limit Ephemeral Storage |
-|---------------|----------------|-------------|---------------------------|--------------|-----------|-------------------------|
-| S             | 100Mi          | 100m        | 50Mi                      | 100Mi        | -         | 2Gi                     |
-| M             | 250Mi          | 250m        | 50Mi                      | 250Mi        | -         | 2Gi                     |
-| L             | 500Mi          | 500m        | 50Mi                      | 500Mi        | -         | 2Gi                     |
-| XL            | 1Gi            | 1           | 50Mi                      | 1Gi          | -         | 2Gi                     |
-| 2XL           | 2Gi            | 1           | 50Mi                      | 2Gi          | -         | 2Gi                     |
-| 3XL           | 4Gi            | 2           | 50Mi                      | 4Gi          | -         | 2Gi                     |
-| 4XL           | 8Gi            | 2           | 50Mi                      | 8Gi          | -         | 2Gi                     |
-| 5XL           | 16Gi           | 4           | 50Mi                      | 16Gi         | -         | 2Gi                     |
+```yaml
+container:
+  resourceTier: "M100M-C1"
+```
 
-Custom resources can be configured when `container.resourceTier` is not used.
+Rendered resources:
+
+- **Requests:** `memory` and `cpu` from the string; `ephemeral-storage` is always `50Mi`.
+- **Limits:** `memory` matches requests; `ephemeral-storage` is always `2Gi`. **CPU is not set in limits** (only in requests).
+
+**Precedence:** If `container.resources.requests` is set, that block is used and `resourceTier` is ignored. Use either full `container.resources` or `resourceTier`, or set resources when you need to override a tier for a specific environment.
 
 #### Advanced: Template Overrides
 
@@ -394,7 +395,7 @@ Add the following values
 ```yaml
 deployment:
   container:
-    # resourceTier: "S"
+    # resourceTier: "m100Mi-c100m"
     port: 8080
     image:
       repository: nginx
@@ -489,7 +490,7 @@ Add the following values
 cronJob:
   schedule: "* * * * *"
   container:
-    # resourceTier: "S"
+    # resourceTier: "m100Mi-c100m"
     image:
       repository: busybox
 ```
@@ -592,7 +593,7 @@ Add the following values
 ```yaml
 job:
   container:
-    # resourceTier: "S"
+    # resourceTier: "m100Mi-c100m"
     port: 8080
     image:
       repository: nginx
@@ -1366,7 +1367,7 @@ Override Service/Ingress References
 | CONTROLLER.container.name | tpl/string | `"app"` | Container name override. |
 | CONTROLLER.container.port | tpl/int | `nil` | Primary container port. |
 | CONTROLLER.container.readinessProbe | tpl/object | `{}` | Readiness probe configuration. |
-| CONTROLLER.container.resourceTier | tpl/string | `""` | Resource tier (S, M, L, XL, 2XL, 3XL, 4XL, 5XL). it takes precedence over the "container.resources". |
+| CONTROLLER.container.resourceTier | tpl/string | `""` | Unified resource tier in format m<memory>-c<cpu> (e.g., m100Mi-c100m, M1Gi-C1). Used as a fallback when "container.resources" is not set. |
 | CONTROLLER.container.resources.limits.cpu | tpl/string | `""` | CPU limit for the container (optional). |
 | CONTROLLER.container.resources.limits.ephemeral-storage | tpl/string | `""` | Ephemeral storage limit for the container (optional). |
 | CONTROLLER.container.resources.limits.memory | tpl/string | `""` | Memory limit for the container. |

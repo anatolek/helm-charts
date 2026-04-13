@@ -21,7 +21,7 @@ pdb:
 # @ignored
 deployment:
   container:
-    resourceTier: "S"
+    resourceTier: "m100Mi-c100m"
     port: 8080
     image:
       repository: nginx
@@ -60,7 +60,7 @@ simple:
       password: xxxxxxx
     # @ignored
     container:
-      resourceTier: "S"
+      resourceTier: "m100Mi-c100m"
       image:
         repository: posgresql-schema-bootstrap
         tag: latest
@@ -71,7 +71,7 @@ simple:
         enabled: false
         # @ignored
         container:
-          resourceTier: "S"
+          resourceTier: "m100Mi-c100m"
           image:
             repository: database-migration
       liquibaseAfterScripts:
@@ -80,7 +80,7 @@ simple:
         enabled: false
         # @ignored
         container:
-          resourceTier: "S"
+          resourceTier: "m100Mi-c100m"
           image:
             repository: database-migration
   postgres:

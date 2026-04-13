@@ -1,7 +1,7 @@
 # @ignored
 deploymentFirst:
   container:
-    resourceTier: "S"
+    resourceTier: "m100Mi-c100m"
     port: 8080
     image:
       repository: nginx
@@ -9,7 +9,7 @@ deploymentFirst:
 # @ignored
 deploymentSecond:
   container:
-    resourceTier: "M"
+    resourceTier: "m250Mi-c250m"
     port: 8080
     image:
       repository: bitnami/nginx

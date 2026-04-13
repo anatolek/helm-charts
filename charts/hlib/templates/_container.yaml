@@ -27,75 +27,7 @@ imagePullPolicy: {{ include "hlib.util.tplrender" (dict "value" ($container.imag
 securityContext: {{- include "hlib.util.tplrender" (dict "value" $container.securityContext "context" $) | nindent 2 }}
 {{- end }}
 resources:
-  {{- if $container.resourceTier }}
-  {{- if eq $container.resourceTier "S" }}
-  requests:
-    memory: "100Mi"
-    cpu: "100m"
-    ephemeral-storage: "50Mi"
-  limits:
-    memory: "100Mi"
-    ephemeral-storage: "2Gi"
-  {{- else if eq $container.resourceTier "M" }}
-  requests:
-    memory: "250Mi"
-    cpu: "250m"
-    ephemeral-storage: "50Mi"
-  limits:
-    memory: "250Mi"
-    ephemeral-storage: "2Gi"
-  {{- else if eq $container.resourceTier "L" }}
-  requests:
-    memory: "500Mi"
-    cpu: "500m"
-    ephemeral-storage: "50Mi"
-  limits:
-    memory: "500Mi"
-    ephemeral-storage: "2Gi"
-  {{- else if eq $container.resourceTier "XL" }}
-  requests:
-    memory: "1Gi"
-    cpu: "1"
-    ephemeral-storage: "50Mi"
-  limits:
-    memory: "1Gi"
-    ephemeral-storage: "2Gi"
-  {{- else if eq $container.resourceTier "2XL" }}
-  requests:
-    memory: "2Gi"
-    cpu: "1"
-    ephemeral-storage: "50Mi"
-  limits:
-    memory: "2Gi"
-    ephemeral-storage: "2Gi"
-  {{- else if eq $container.resourceTier "3XL" }}
-  requests:
-    memory: "4Gi"
-    cpu: "2"
-    ephemeral-storage: "50Mi"
-  limits:
-    memory: "4Gi"
-    ephemeral-storage: "2Gi"
-  {{- else if eq $container.resourceTier "4XL" }}
-  requests:
-    memory: "8Gi"
-    cpu: "2"
-    ephemeral-storage: "50Mi"
-  limits:
-    memory: "8Gi"
-    ephemeral-storage: "2Gi"
-  {{- else if eq $container.resourceTier "5XL" }}
-  requests:
-    memory: "16Gi"
-    cpu: "4"
-    ephemeral-storage: "50Mi"
-  limits:
-    memory: "16Gi"
-    ephemeral-storage: "2Gi"
-  {{- else }}
-  {{- fail (cat ($container.resourceTier | quote) "is not supported container resourceTier." "Please use one of the following: S, M, L, XL, 2XL, 3XL, 4XL, 5XL") }}
-  {{- end }}
-  {{- else }}
+  {{- if ($container.resources).requests }}
   {{- $requests := (($container.resources).requests) }}
   {{- $limits := (($container.resources).limits) }}
   requests:
@@ -112,6 +44,11 @@ resources:
     {{- if (index $limits "ephemeral-storage") }}
     ephemeral-storage: {{ include "hlib.util.tplrender" (dict "value" (index $limits "ephemeral-storage") "context" $) }}
     {{- end }}
+  {{- else if $container.resourceTier }}
+  {{- $tier := include "hlib.util.tplrender" (dict "value" $container.resourceTier "context" $) }}
+  {{- include "hlib.util.resourceTier" $tier | indent 2 }}
+  {{- else }}
+  {{- fail (printf $requiredMsg "container.resources.requests or container.resourceTier") }}
   {{- end }}
 {{- if $container.port }}
 ports:

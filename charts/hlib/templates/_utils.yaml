@@ -113,3 +113,30 @@ A default message string to be used when checking for a required value
 {{- define "hlib.default-check-required-msg" -}}
 {{- "No value found for '%s'" -}}
 {{- end -}}
+
+{{- /*
+Parses a dynamic resource tier string m<memory>-c<cpu> (prefix letters case-insensitive)
+and renders Kubernetes resources.requests / resources.limits.
+*/ -}}
+{{- define "hlib.util.resourceTier" -}}
+{{- $tier := . -}}
+{{- if not (regexMatch "^[mM][^-]+-[cC][^-]+$" $tier) }}
+{{- fail (printf "'%s' is not a valid resourceTier format. Expected format: m<memory>-c<cpu> (e.g., m100Mi-c100m, M1Gi-C1)" $tier) }}
+{{- end }}
+{{- $parts := splitn "-" 2 $tier -}}
+{{- $memory := regexReplaceAll "^[mM]" $parts._0 "" -}}
+{{- $cpu := regexReplaceAll "^[cC]" $parts._1 "" -}}
+{{- if not (regexMatch "^[0-9]+(\\.[0-9]+)?(E|P|T|G|M|K|Ei|Pi|Ti|Gi|Mi|Ki)?$" $memory) }}
+{{- fail (printf "Invalid memory value '%s' in resourceTier '%s'. Expected Kubernetes quantity (e.g., 100Mi, 1Gi, 500M)" $memory $tier) }}
+{{- end }}
+{{- if not (regexMatch "^[0-9]+(\\.[0-9]+)?m?$" $cpu) }}
+{{- fail (printf "Invalid CPU value '%s' in resourceTier '%s'. Expected Kubernetes CPU quantity (e.g., 100m, 1, 0.5)" $cpu $tier) }}
+{{- end }}
+requests:
+  memory: {{ $memory | quote }}
+  cpu: {{ $cpu | quote }}
+  ephemeral-storage: "50Mi"
+limits:
+  memory: {{ $memory | quote }}
+  ephemeral-storage: "2Gi"
+{{- end -}}

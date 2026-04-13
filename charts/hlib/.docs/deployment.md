@@ -16,7 +16,7 @@ Add the following values
 ```yaml
 deployment:
   container:
-    # resourceTier: "S"
+    # resourceTier: "m100Mi-c100m"
     port: 8080
     image:
       repository: nginx
