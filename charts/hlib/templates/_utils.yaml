@@ -36,6 +36,20 @@ Renders Kubernetes environment variable definitions based on input dictionary.
         configMapKeyRef:
           name: {{ first (keys $config.configMapKeyRef) | quote }}
           key: {{ index $config.configMapKeyRef (first (keys $config.configMapKeyRef)) | quote }}
+      {{- else if and (hasKey $config "fieldRef") (ne $config.fieldRef nil) }}
+      valueFrom:
+        fieldRef:
+          fieldPath: {{ $config.fieldRef | quote }}
+      {{- else if and (hasKey $config "resourceFieldRef") (gt (len (keys $config.resourceFieldRef)) 0) }}
+      valueFrom:
+        resourceFieldRef:
+          resource: {{ $config.resourceFieldRef.resource | quote }}
+          {{- if $config.resourceFieldRef.containerName }}
+          containerName: {{ $config.resourceFieldRef.containerName | quote }}
+          {{- end }}
+          {{- if $config.resourceFieldRef.divisor }}
+          divisor: {{ $config.resourceFieldRef.divisor | quote }}
+          {{- end }}
       {{- else if hasKey $config "value" }}
       value: {{ $config.value | quote }}
       {{- end }}

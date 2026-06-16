@@ -1,6 +1,6 @@
 # hlib
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: library](https://img.shields.io/badge/Type-library-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: library](https://img.shields.io/badge/Type-library-informational?style=flat-square)
 [![GitHub license](https://img.shields.io/github/license/anatolek/helm-charts)](https://github.com/anatolek/helm-charts)
 
 A reusable Helm library chart that provides common Kubernetes template primitives for building consistent, maintainable charts across applications.
@@ -127,6 +127,47 @@ Renders Kubernetes environment variable definitions based on input dictionary.
       configMapKeyRef:
         name: "my-config"
         key: "setting"
+  ```
+
+- Downward API field references.
+
+  Example:
+
+  ```yaml
+  POD_NAME:
+    fieldRef: metadata.name
+  ```
+
+  Result:
+
+  ```yaml
+  - name: "POD_NAME"
+    valueFrom:
+      fieldRef:
+        fieldPath: "metadata.name"
+  ```
+
+- Downward API resource field references.
+
+  Example:
+
+  ```yaml
+  CPU_REQUEST:
+    resourceFieldRef:
+      resource: requests.cpu
+      containerName: app
+      divisor: "1m"
+  ```
+
+  Result:
+
+  ```yaml
+  - name: "CPU_REQUEST"
+    valueFrom:
+      resourceFieldRef:
+        resource: "requests.cpu"
+        containerName: "app"
+        divisor: "1m"
   ```
 
 **Ignored:**

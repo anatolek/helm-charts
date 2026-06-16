@@ -101,6 +101,47 @@ Renders Kubernetes environment variable definitions based on input dictionary.
         key: "setting"
   ```
 
+- Downward API field references.
+
+  Example:
+
+  ```yaml
+  POD_NAME:
+    fieldRef: metadata.name
+  ```
+
+  Result:
+
+  ```yaml
+  - name: "POD_NAME"
+    valueFrom:
+      fieldRef:
+        fieldPath: "metadata.name"
+  ```
+
+- Downward API resource field references.
+
+  Example:
+
+  ```yaml
+  CPU_REQUEST:
+    resourceFieldRef:
+      resource: requests.cpu
+      containerName: app
+      divisor: "1m"
+  ```
+
+  Result:
+
+  ```yaml
+  - name: "CPU_REQUEST"
+    valueFrom:
+      resourceFieldRef:
+        resource: "requests.cpu"
+        containerName: "app"
+        divisor: "1m"
+  ```
+
 **Ignored:**
 
 Entries with a value of `<no value>` or empty/null will be skipped.
