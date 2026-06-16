@@ -9,5 +9,14 @@ POSTGRES_USERNAME:
 POSTGRES_PASSWORD:
   secretKeyRef:
     {{ include "hlib.fullname" . }}: POSTGRES_PASSWORD
+POD_NAME:
+  fieldRef: metadata.name
+POD_NAMESPACE:
+  fieldRef: metadata.namespace
+CPU_REQUEST:
+  resourceFieldRef:
+    resource: requests.cpu
+    containerName: app
+    divisor: "1m"
 {{- include "hlib.util.springKafkaValues" (dict "prefix" "spring.kafka.producer.properties" "values" .Values.envVars.kafka.producer.properties) }}
 {{- end -}}
