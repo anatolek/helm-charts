@@ -3,6 +3,7 @@
 {{- $container := .values | default (($.Values.deployment).container) -}}
 {{- $env := .env -}}
 {{- $requiredMsg := include "hlib.default-check-required-msg" $ -}}
+{{- $tmpDir := $container.tmpDir | default dict }}
 name: {{ include "hlib.util.tplrender" (dict "value" ($container.name | default "app") "context" $) }}
 image: {{ include "hlib.util.image" (dict "imageRoot" $container.image "global" $.Values.global "chart" $.Chart) }}
 {{- if or $env $container.extraEnv }}
@@ -59,9 +60,11 @@ ports:
 {{ include "hlib.util.tplrender" (dict "value" $container.extraPorts "context" $) }}
 {{- end }}
 {{- end }}
+{{- if dig "enabled" true $tmpDir }}
 volumeMounts:
-- mountPath: /tmp
+- mountPath: {{ include "hlib.util.tplrender" (dict "value" ($tmpDir.mountPath | default "/tmp") "context" $) }}
   name: temp-dir
+{{- end }}
 {{- if $container.startupProbe }}
 startupProbe: {{- include "hlib.util.tplrender" (dict "value" $container.startupProbe "context" $) | nindent 2 }}
 {{- end }}

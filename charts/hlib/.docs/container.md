@@ -87,6 +87,21 @@ Rendered resources:
 
 **Precedence:** If `container.resources.requests` is set, that block is used and `resourceTier` is ignored. Use either full `container.resources` or `resourceTier`, or set resources when you need to override a tier for a specific environment.
 
+**Temporary `/tmp` volume (`tmpDir`)**
+
+By default, controllers inject an `emptyDir` volume named `temp-dir` and mount it at `/tmp` in the container. Configure or disable it via `container.tmpDir`:
+
+```yaml
+container:
+  tmpDir:
+    enabled: true
+    mountPath: /tmp
+    medium: ""        # e.g. "Memory" for tmpfs
+    sizeLimit: ""     # e.g. "64Mi"
+```
+
+Set `enabled: false` when the container does not need a writable `/tmp` volume. Set `medium: Memory` and `sizeLimit` when you need a bounded tmpfs.
+
 #### Advanced: Template Overrides
 
 The changes can only be added to the container base template via `override` parameter.

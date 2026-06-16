@@ -128,6 +128,27 @@
                             "description": "Policy for termination message handling.",
                             "type": "string"
                         },
+                        "tmpDir": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "description": "Whether to mount a writable emptyDir volume at the container tmp path.",
+                                    "type": "boolean"
+                                },
+                                "medium": {
+                                    "description": "emptyDir medium (e.g. \"Memory\" for tmpfs). Leave empty for node disk.",
+                                    "type": "string"
+                                },
+                                "mountPath": {
+                                    "description": "Mount path for the temporary directory volume.",
+                                    "type": "string"
+                                },
+                                "sizeLimit": {
+                                    "description": "Maximum size of the emptyDir volume (e.g. \"64Mi\", \"1Gi\").",
+                                    "type": "string"
+                                }
+                            }
+                        },
                         "workingDir": {
                             "description": "Working directory inside the container.",
                             "type": "string"

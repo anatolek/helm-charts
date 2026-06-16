@@ -1,6 +1,6 @@
 # hlib
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: library](https://img.shields.io/badge/Type-library-informational?style=flat-square)
+![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: library](https://img.shields.io/badge/Type-library-informational?style=flat-square)
 [![GitHub license](https://img.shields.io/github/license/anatolek/helm-charts)](https://github.com/anatolek/helm-charts)
 
 A reusable Helm library chart that provides common Kubernetes template primitives for building consistent, maintainable charts across applications.
@@ -391,6 +391,21 @@ Rendered resources:
 - **Limits:** `memory` matches requests; `ephemeral-storage` is always `2Gi`. **CPU is not set in limits** (only in requests).
 
 **Precedence:** If `container.resources.requests` is set, that block is used and `resourceTier` is ignored. Use either full `container.resources` or `resourceTier`, or set resources when you need to override a tier for a specific environment.
+
+**Temporary `/tmp` volume (`tmpDir`)**
+
+By default, controllers inject an `emptyDir` volume named `temp-dir` and mount it at `/tmp` in the container. Configure or disable it via `container.tmpDir`:
+
+```yaml
+container:
+  tmpDir:
+    enabled: true
+    mountPath: /tmp
+    medium: ""        # e.g. "Memory" for tmpfs
+    sizeLimit: ""     # e.g. "64Mi"
+```
+
+Set `enabled: false` when the container does not need a writable `/tmp` volume. Set `medium: Memory` and `sizeLimit` when you need a bounded tmpfs.
 
 #### Advanced: Template Overrides
 
@@ -1419,6 +1434,10 @@ Override Service/Ingress References
 | CONTROLLER.container.startupProbe | tpl/object | `{}` | Startup probe configuration. |
 | CONTROLLER.container.terminationMessagePath | tpl/string | `""` | Path to the termination message file. |
 | CONTROLLER.container.terminationMessagePolicy | tpl/string | `""` | Policy for termination message handling. |
+| CONTROLLER.container.tmpDir.enabled | tpl/bool | `true` | Whether to mount a writable emptyDir volume at the container tmp path. |
+| CONTROLLER.container.tmpDir.medium | tpl/string | `""` | emptyDir medium (e.g. "Memory" for tmpfs). Leave empty for node disk. |
+| CONTROLLER.container.tmpDir.mountPath | tpl/string | `"/tmp"` | Mount path for the temporary directory volume. |
+| CONTROLLER.container.tmpDir.sizeLimit | tpl/string | `""` | Maximum size of the emptyDir volume (e.g. "64Mi", "1Gi"). |
 | CONTROLLER.container.workingDir | tpl/string | `""` | Working directory inside the container. |
 
 ### HorizontalPodAutoscaler

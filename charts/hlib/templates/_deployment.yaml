@@ -85,9 +85,22 @@ spec:
       {{- if $deploy.terminationGracePeriodSeconds }}
       terminationGracePeriodSeconds: {{ include "hlib.util.tplrender" (dict "value" $deploy.terminationGracePeriodSeconds "context" $) }}
       {{- end }}
+      {{- $tmpDir := ($deploy.container).tmpDir | default dict }}
+      {{- if dig "enabled" true $tmpDir }}
       volumes:
       - name: temp-dir
+        {{- if or $tmpDir.medium $tmpDir.sizeLimit }}
+        emptyDir:
+          {{- if $tmpDir.medium }}
+          medium: {{ include "hlib.util.tplrender" (dict "value" $tmpDir.medium "context" $) }}
+          {{- end }}
+          {{- if $tmpDir.sizeLimit }}
+          sizeLimit: {{ include "hlib.util.tplrender" (dict "value" $tmpDir.sizeLimit "context" $) }}
+          {{- end }}
+        {{- else }}
         emptyDir: {}
+        {{- end }}
+      {{- end }}
       containers:
       - {{- include "hlib.container" (dict "context" $ "values" $deploy.container "env" $env) }}
 {{- end }}
