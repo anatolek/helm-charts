@@ -225,6 +225,23 @@ CONTROLLER:
     # @section -- Container
     terminationMessagePolicy: ""
 
+    tmpDir:
+      # -- (tpl/bool) Whether to mount a writable emptyDir volume at the container tmp path.
+      # @section -- Container
+      enabled: true
+
+      # -- (tpl/string) Mount path for the temporary directory volume.
+      # @section -- Container
+      mountPath: "/tmp"
+
+      # -- (tpl/string) emptyDir medium (e.g. "Memory" for tmpfs). Leave empty for node disk.
+      # @section -- Container
+      medium: ""
+
+      # -- (tpl/string) Maximum size of the emptyDir volume (e.g. "64Mi", "1Gi").
+      # @section -- Container
+      sizeLimit: ""
+
 cronjob:
   # -- (tpl/string) Name of the CronJob.
   # @section -- CronJob

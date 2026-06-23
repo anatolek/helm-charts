@@ -112,9 +112,22 @@ spec:
           terminationGracePeriodSeconds: {{ include "hlib.util.tplrender" (dict "value" $cronJob.terminationGracePeriodSeconds "context" $) }}
           {{- end }}
           restartPolicy: {{ include "hlib.util.tplrender" (dict "value" ($cronJob.restartPolicy | default "Never") "context" $) }}
+          {{- $tmpDir := ($cronJob.container).tmpDir | default dict }}
+          {{- if dig "enabled" true $tmpDir }}
           volumes:
           - name: temp-dir
+            {{- if or $tmpDir.medium $tmpDir.sizeLimit }}
+            emptyDir:
+              {{- if $tmpDir.medium }}
+              medium: {{ include "hlib.util.tplrender" (dict "value" $tmpDir.medium "context" $) }}
+              {{- end }}
+              {{- if $tmpDir.sizeLimit }}
+              sizeLimit: {{ include "hlib.util.tplrender" (dict "value" $tmpDir.sizeLimit "context" $) }}
+              {{- end }}
+            {{- else }}
             emptyDir: {}
+            {{- end }}
+          {{- end }}
           containers:
           - {{- include "hlib.container" (dict "context" $ "values" ($cronJob.container | required "CronJob container configuration 'CRONJOB_PATH.container' required!") "env" $env) | indent 4 }}
 {{- end }}

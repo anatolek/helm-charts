@@ -3,7 +3,7 @@ name: hlib
 description: Helm library chart for common Kubernetes templates
 type: library
 kubeVersion: '>=1.32.0-0'
-version: 0.3.0
+version: 0.4.0
 home: https://github.com/anatolek/helm-charts
 icon: https://raw.githubusercontent.com/anatolek/helm-charts/main/charts/hlib/img/icon.png
 sources:
@@ -24,7 +24,7 @@ annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/changes: |
     - kind: added
-      description: Downward API env var support (fieldRef and resourceFieldRef) in renderEnvVars helper
+      description: Configurable container tmpDir volume (enable/disable, mountPath, emptyDir medium and sizeLimit)
   artifacthub.io/links: |
     - name: GitHub Repository
       url: https://github.com/anatolek/helm-charts
