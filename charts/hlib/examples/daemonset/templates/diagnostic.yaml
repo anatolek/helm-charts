@@ -1,0 +1,3 @@
+{{- if .Values.diagnosticMode.enabled }}
+{{- include "hlib.diagnostic" . -}}
+{{- end }}

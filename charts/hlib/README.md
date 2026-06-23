@@ -1,6 +1,6 @@
 # hlib
 
-![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: library](https://img.shields.io/badge/Type-library-informational?style=flat-square)
+![Version: 0.5.0](https://img.shields.io/badge/Version-0.5.0-informational?style=flat-square) ![Type: library](https://img.shields.io/badge/Type-library-informational?style=flat-square)
 [![GitHub license](https://img.shields.io/github/license/anatolek/helm-charts)](https://github.com/anatolek/helm-charts)
 
 A reusable Helm library chart that provides common Kubernetes template primitives for building consistent, maintainable charts across applications.
@@ -520,6 +520,98 @@ spec:
 {{- end -}}
 
 {{- define "app.deployment.container.env" -}}
+TZ: {{ ((.Values.global).timezone) }}
+PASSWORD:
+  secretKeyRef:
+    {{ include "hlib.fullname" . }}: PASSWORD
+{{- end -}}
+```
+
+### `hlib.daemonSet` template
+
+Creates Kubernetes DaemonSet manifest.
+By default, only one container is deployed due to the complexity of implementing multi-containerization.
+
+#### Basic Usage
+
+Include this template in your chart's `templates/daemonset.yaml`:
+
+```handlebars
+{{- include "hlib.daemonSet" (dict "context" . "values" .Values.daemonset) }}
+```
+
+Add the following values
+
+```yaml
+daemonset:
+  container:
+    # resourceTier: "m100Mi-c100m"
+    image:
+      repository: busybox
+```
+
+#### Configuration
+
+| Parameter      | Description                                                               | Required | Default              |
+|----------------|---------------------------------------------------------------------------|----------|----------------------|
+| `context`      | Root Helm context (usually `.`)                                           | Yes      | -                    |
+| `values`       | DaemonSet configuration values (from `values.yaml`)                       | No       | `.Values.daemonset`  |
+| `envTpl`       | Name of a template that generates environment variables in YAML format    | No       | -                    |
+| `dependencies` | Dictionary of dependent components (see below)                            | No       | -                    |
+| `override`     | Name of a template that overrides the basic one configured in the library | No       | -                    |
+
+**Dependency Integration**
+
+Used to override the configuration path of resources on which it depends.
+
+| Dependency       | Usage                          | Default                  |
+|------------------|--------------------------------|--------------------------|
+| `serviceAccount` | Service account name injection | `.Values.serviceAccount` |
+
+```handlebars
+{{- $dependencies := dict "serviceAccount" .Values.newServiceAccount -}}
+{{- include "hlib.daemonSet" (dict "context" . "dependencies" $dependencies) }}
+```
+
+**Environment Variables**
+
+Provide a template name to `envTpl` that outputs environment variables in valid YAML format:
+
+```handlebars
+{{- include "hlib.daemonSet" (dict "context" . "envTpl" "your.env.template") }}
+```
+
+Example template (`templates/_env.yaml`):
+```handlebars
+{{- define "your.env.template" -}}
+- name: ENV_VAR
+  value: "production"
+{{- end -}}
+
+# or use a simplified approach
+
+{{- define "your.env.template" -}}
+ENV_VAR: "production"
+{{- end -}}
+```
+
+#### Advanced: Template Overrides
+
+If there is no need to make any changes to the container,
+the changes can only be added to the DaemonSet base template via `override` parameter as follows:
+
+```handlebars
+{{- include "hlib.daemonSet" (dict "context" . "override" "app.daemonSet" "envTpl" "app.daemonSet.container.env") -}}
+
+{{- define "app.daemonSet" -}}
+spec:
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print .Template.BasePath "/secret.yaml") $ | sha256sum }}
+{{- end -}}
+
+{{- define "app.daemonSet.container.env" -}}
 TZ: {{ ((.Values.global).timezone) }}
 PASSWORD:
   secretKeyRef:
@@ -1494,6 +1586,32 @@ Override Service/Ingress References
 | cronjob.tolerations | tpl/list | `.Values.global.tolerations` | Tolerations. |
 | cronjob.topologySpreadConstraints | tpl/list | `[]` | Topology spread constraints. |
 | cronjob.ttlSecondsAfterFinished | tpl/int | `nil` | Time in seconds to retain the job after it finishes. It is recommended to use this parameter for one-time jobs instead of a Helm hook that deletes the job immediately --> "helm.sh/hook-delete-policy": hook-succeeded. |
+
+### DaemonSet
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| daemonset.affinity | tpl/object | `.Values.global.affinity` | Affinity rules for pod scheduling. |
+| daemonset.annotations | tpl/object | `{}` | Annotations to add to the DaemonSet. |
+| daemonset.imagePullSecrets | tpl/list | `.Values.global.imagePullSecrets` | Image pull secrets. |
+| daemonset.minReadySeconds | tpl/int | `nil` | Minimum time in seconds for which a newly created pod should be ready. |
+| daemonset.name | tpl/string | Release fullname | Name of the DaemonSet. |
+| daemonset.nodeSelector | tpl/object | `.Values.global.nodeSelector` | Node selector for pod assignment. |
+| daemonset.podAnnotations | tpl/object | `{}` | Annotations to add to the DaemonSet's pod template. |
+| daemonset.podDnsConfig | tpl/object | `{}` | DNS configuration for pods. |
+| daemonset.podDnsPolicy | tpl/string | `""` | DNS policy for pods. |
+| daemonset.podHostAliases | tpl/list | `[]` | An optional list of hosts and IPs that will be injected into the pod's hosts file if specified. |
+| daemonset.podHostNetwork | tpl/bool | `nil` | Use the host's network namespace. |
+| daemonset.podHostname | tpl/string | `""` | Hostname of the pod. |
+| daemonset.podSecurityContext | tpl/object | `{}` | Security context for the pod. |
+| daemonset.podShareProcessNamespace | tpl/bool | `nil` | Enable process namespace sharing within pod. |
+| daemonset.priorityClassName | tpl/string | `""` | Priority class name for the pod. |
+| daemonset.revisionHistoryLimit | tpl/int | `10` | Number of old DaemonSet revisions to retain for rollback. |
+| daemonset.runtimeClassName | tpl/string | `""` | Runtime class name for the pod. |
+| daemonset.terminationGracePeriodSeconds | tpl/int | `nil` | Duration in seconds the pod needs to terminate gracefully. |
+| daemonset.tolerations | tpl/list | `.Values.global.tolerations` | Tolerations for pod scheduling. |
+| daemonset.topologySpreadConstraints | tpl/list | `[]` | Topology spread constraints for pods. |
+| daemonset.updateStrategy | tpl/object | `{}` | Strategy used to replace old Pods by new ones. |
 
 ### Deployment
 

@@ -1,0 +1,16 @@
+{{- include "hlib.daemonSet" (dict "context" . "override" "daemon.daemonSet") -}}
+
+{{- define "daemon.daemonSet" -}}
+{{- $env := fromYaml (include "daemon.daemonSet.container.env" .) -}}
+spec:
+  template:
+    spec:
+      containers:
+      - {{- include "hlib.container" (dict "context" . "values" .Values.daemonset.container "env" $env "override" "daemon.daemonSet.container") | indent 4 }}
+{{- end -}}
+
+{{- define "daemon.daemonSet.container" -}}
+envFrom:
+  - secretRef:
+      name: {{ include "hlib.fullname" . }}
+{{- end -}}

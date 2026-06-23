@@ -464,6 +464,96 @@ deployment:
   # @default -- `.Values.global.imagePullSecrets`
   imagePullSecrets: []
 
+daemonset:
+  # -- (tpl/string) Name of the DaemonSet.
+  # @section -- DaemonSet
+  # @default -- Release fullname
+  name: ""
+
+  # -- (tpl/int) Number of old DaemonSet revisions to retain for rollback.
+  # @section -- DaemonSet
+  revisionHistoryLimit: 10
+
+  # -- (tpl/int) Minimum time in seconds for which a newly created pod should be ready.
+  # @section -- DaemonSet
+  minReadySeconds:
+
+  # -- (tpl/object) Strategy used to replace old Pods by new ones.
+  # @section -- DaemonSet
+  updateStrategy: {}
+
+  # -- (tpl/object) Annotations to add to the DaemonSet.
+  # @section -- DaemonSet
+  annotations: {}
+
+  # -- (tpl/object) Annotations to add to the DaemonSet's pod template.
+  # @section -- DaemonSet
+  podAnnotations: {}
+
+  # -- (tpl/object) Security context for the pod.
+  # @section -- DaemonSet
+  podSecurityContext: {}
+
+  # -- (tpl/object) Node selector for pod assignment.
+  # @section -- DaemonSet
+  # @default -- `.Values.global.nodeSelector`
+  nodeSelector: {}
+
+  # -- (tpl/object) Affinity rules for pod scheduling.
+  # @section -- DaemonSet
+  # @default -- `.Values.global.affinity`
+  affinity: {}
+
+  # -- (tpl/list) Tolerations for pod scheduling.
+  # @section -- DaemonSet
+  # @default -- `.Values.global.tolerations`
+  tolerations: []
+
+  # -- (tpl/list) Topology spread constraints for pods.
+  # @section -- DaemonSet
+  topologySpreadConstraints: []
+
+  # -- (tpl/object) DNS configuration for pods.
+  # @section -- DaemonSet
+  podDnsConfig: {}
+
+  # -- (tpl/string) DNS policy for pods.
+  # @section -- DaemonSet
+  podDnsPolicy: ""
+
+  # -- (tpl/bool) Use the host's network namespace.
+  # @section -- DaemonSet
+  podHostNetwork:
+
+  # -- (tpl/list) An optional list of hosts and IPs that will be injected into the pod's hosts file if specified.
+  # @section -- DaemonSet
+  podHostAliases: []
+
+  # -- (tpl/string) Hostname of the pod.
+  # @section -- DaemonSet
+  podHostname: ""
+
+  # -- (tpl/bool) Enable process namespace sharing within pod.
+  # @section -- DaemonSet
+  podShareProcessNamespace:
+
+  # -- (tpl/string) Priority class name for the pod.
+  # @section -- DaemonSet
+  priorityClassName: ""
+
+  # -- (tpl/string) Runtime class name for the pod.
+  # @section -- DaemonSet
+  runtimeClassName: ""
+
+  # -- (tpl/int) Duration in seconds the pod needs to terminate gracefully.
+  # @section -- DaemonSet
+  terminationGracePeriodSeconds:
+
+  # -- (tpl/list) Image pull secrets.
+  # @section -- DaemonSet
+  # @default -- `.Values.global.imagePullSecrets`
+  imagePullSecrets: []
+
 job:
   # -- (tpl/string) Name of the Job.
   # @section -- Job
