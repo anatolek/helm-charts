@@ -607,6 +607,35 @@
             "description": "Override the chart full name from `{{ Release.Name }}-{{ .Chart.Name }}` to `{{ Release.Name }}-{{ .Values.nameOverride }}`.",
             "type": "string"
         },
+        "networkPolicy": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "description": "Annotations to add to the NetworkPolicy metadata.",
+                    "type": "object"
+                },
+                "egress": {
+                    "description": "List of egress rules applied to the selected pods. Traffic is allowed if it matches at least one rule.",
+                    "type": "array"
+                },
+                "ingress": {
+                    "description": "List of ingress rules applied to the selected pods. Traffic is allowed if it matches at least one rule.",
+                    "type": "array"
+                },
+                "name": {
+                    "description": "Override the name of the NetworkPolicy.",
+                    "type": "string"
+                },
+                "podSelector": {
+                    "description": "Selects the pods to which this NetworkPolicy applies.",
+                    "type": "object"
+                },
+                "policyTypes": {
+                    "description": "List of rule types the NetworkPolicy relates to. Valid values are \"Ingress\" and \"Egress\".",
+                    "type": "array"
+                }
+            }
+        },
         "pdb": {
             "type": "object",
             "properties": {
