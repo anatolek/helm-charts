@@ -10,6 +10,7 @@
 | `simple-deployment`    | Complete chart for simple application                             |
 | `init-deployment`      | Simple chart, a good start for deploying a new application |
 | `volumes`              | Mounting secrets and configmaps as volumes                        |
+| `vpa`                  | Create a Vertical Pod Autoscaler                                  |
 
 To render a chart try to run:
 
