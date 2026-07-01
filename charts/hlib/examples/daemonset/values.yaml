@@ -1,0 +1,36 @@
+diagnosticMode:
+  # -- Whether to enable diagnostic mode
+  enabled: false
+
+serviceAccount:
+  # -- Whether to enable Service Account.
+  enabled: false
+
+# @ignored
+daemonset:
+  container:
+    resourceTier: "m100Mi-c100m"
+    image:
+      repository: busybox
+    command: ["/bin/sh", "-c"]
+    args: ["touch /tmp/healthy; sleep 30; rm -f /tmp/healthy; sleep 600"]
+    livenessProbe:
+      exec:
+        command:
+          - cat
+          - /tmp/healthy
+      initialDelaySeconds: 5
+      periodSeconds: 5
+    readinessProbe: {}
+
+daemon:
+  postgres:
+    # -- PostgreSQL URL.
+    # @section -- Simple Application
+    host: some.postgres.test.host
+    # -- PostgreSQL user password.
+    # @section -- Simple Application
+    password: "SuperSecretP@ssvv0rd"
+    # -- PostgreSQL username.
+    # @section -- Simple Application
+    username: simple

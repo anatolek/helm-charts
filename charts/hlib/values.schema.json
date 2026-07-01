@@ -332,6 +332,95 @@
                 }
             }
         },
+        "daemonset": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "description": "Affinity rules for pod scheduling.",
+                    "type": "object"
+                },
+                "annotations": {
+                    "description": "Annotations to add to the DaemonSet.",
+                    "type": "object"
+                },
+                "imagePullSecrets": {
+                    "description": "Image pull secrets.",
+                    "type": "array"
+                },
+                "minReadySeconds": {
+                    "description": "Minimum time in seconds for which a newly created pod should be ready.",
+                    "type": "null"
+                },
+                "name": {
+                    "description": "Name of the DaemonSet.",
+                    "type": "string"
+                },
+                "nodeSelector": {
+                    "description": "Node selector for pod assignment.",
+                    "type": "object"
+                },
+                "podAnnotations": {
+                    "description": "Annotations to add to the DaemonSet's pod template.",
+                    "type": "object"
+                },
+                "podDnsConfig": {
+                    "description": "DNS configuration for pods.",
+                    "type": "object"
+                },
+                "podDnsPolicy": {
+                    "description": "DNS policy for pods.",
+                    "type": "string"
+                },
+                "podHostAliases": {
+                    "description": "An optional list of hosts and IPs that will be injected into the pod's hosts file if specified.",
+                    "type": "array"
+                },
+                "podHostNetwork": {
+                    "description": "Use the host's network namespace.",
+                    "type": "null"
+                },
+                "podHostname": {
+                    "description": "Hostname of the pod.",
+                    "type": "string"
+                },
+                "podSecurityContext": {
+                    "description": "Security context for the pod.",
+                    "type": "object"
+                },
+                "podShareProcessNamespace": {
+                    "description": "Enable process namespace sharing within pod.",
+                    "type": "null"
+                },
+                "priorityClassName": {
+                    "description": "Priority class name for the pod.",
+                    "type": "string"
+                },
+                "revisionHistoryLimit": {
+                    "description": "Number of old DaemonSet revisions to retain for rollback.",
+                    "type": "integer"
+                },
+                "runtimeClassName": {
+                    "description": "Runtime class name for the pod.",
+                    "type": "string"
+                },
+                "terminationGracePeriodSeconds": {
+                    "description": "Duration in seconds the pod needs to terminate gracefully.",
+                    "type": "null"
+                },
+                "tolerations": {
+                    "description": "Tolerations for pod scheduling.",
+                    "type": "array"
+                },
+                "topologySpreadConstraints": {
+                    "description": "Topology spread constraints for pods.",
+                    "type": "array"
+                },
+                "updateStrategy": {
+                    "description": "Strategy used to replace old Pods by new ones.",
+                    "type": "object"
+                }
+            }
+        },
         "deployment": {
             "type": "object",
             "properties": {
