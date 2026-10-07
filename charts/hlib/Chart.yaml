@@ -3,7 +3,7 @@ name: hlib
 description: Helm library chart for common Kubernetes templates
 type: library
 kubeVersion: '>=1.32.0-0'
-version: 0.10.0
+version: 0.10.1
 home: https://github.com/anatolek/helm-charts
 icon: https://raw.githubusercontent.com/anatolek/helm-charts/main/charts/hlib/img/icon.png
 sources:
@@ -31,6 +31,8 @@ keywords:
 annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/changes: |
+    - kind: added
+      description: Configurable appProtocol field for the primary Service port, defaulting to http
     - kind: added
       description: ServiceMonitor and PodMonitor templates for Prometheus Operator target discovery
   artifacthub.io/links: |
