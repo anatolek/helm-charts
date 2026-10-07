@@ -5,8 +5,10 @@ changes touch reusable templates, their documentation, and the values schema. Th
 explains how to set up your environment, run checks locally, and open a pull request that
 passes CI on the first try.
 
-By participating in this project you agree to keep interactions respectful and
-constructive. Be kind, assume good intent, and keep discussions focused on the work.
+By participating in this project you agree to follow the
+[code of conduct](CODE_OF_CONDUCT.md). Be kind, assume good intent, and keep discussions
+focused on the work. For usage questions, see [SUPPORT.md](SUPPORT.md); report suspected
+vulnerabilities privately using [SECURITY.md](SECURITY.md).
 
 ## Table of contents
 
@@ -136,15 +138,16 @@ fail when the committed output differs from a fresh generation.
 
 ## Documentation changes
 
-`README.md` files (both repository-level chart docs and example docs) are **generated** by
+The chart and example `README.md` files under `charts/hlib/` are **generated** by
 helm-docs. Do not edit them directly — your changes would be overwritten and CI would
-fail.
+fail. The root `README.md` and project community guides are maintained directly.
 
 - Document values by adding helm-docs comments in `values.yaml`.
 - Add a new documentation section as a separate file under `charts/hlib/.docs/`, then link
   it from `charts/hlib/README.md.gotmpl`.
 - Regenerate with `helm-docs --skip-version-footer` and commit the generated output
   together with your source changes.
+- Follow the [accessibility guidance](ACCESSIBILITY.md) when updating documentation.
 
 ## Values schema changes
 
@@ -194,16 +197,27 @@ Before opening a PR, make sure that:
       link the related issue.
 
 CI runs the documentation and schema diff checks on every pull request and **fails on any
-diff**. Keep the PR scope focused to make review easier.
+diff**. Keep the PR scope focused to make review easier. For changes limited to
+community files or project documentation, check links and any issue-form YAML;
+chart rendering, schema regeneration, and chart version changes are not required
+unless the chart or its generated documentation is affected. Explain which checks
+apply in the [PR template](.github/pull_request_template.md).
 
 ## Reporting bugs and requesting features
 
 Open an issue on the
-[GitHub issue tracker](https://github.com/anatolek/helm-charts/issues). For bugs, include:
+[GitHub issue templates](https://github.com/anatolek/helm-charts/issues/new/choose).
+Search existing issues first. For bugs, include:
 
 - The library version (`charts/hlib/Chart.yaml`) and your Helm version.
 - A minimal `values.yaml` and template include that reproduces the problem.
 - The rendered output you got versus what you expected.
+
+For features, describe the use case, proposed behavior, and alternatives considered.
+Remove credentials and private information from examples and logs. For usage questions,
+see [SUPPORT.md](SUPPORT.md). For accessibility barriers, see
+[ACCESSIBILITY.md](ACCESSIBILITY.md). Suspected vulnerabilities should be reported
+privately using [SECURITY.md](SECURITY.md), rather than through public issues.
 
 ## License
 
