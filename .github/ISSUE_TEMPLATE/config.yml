@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Usage questions and support
+    url: https://github.com/anatolek/helm-charts/blob/main/SUPPORT.md
+    about: Find documentation and the right channel for help.
+  - name: Report a security vulnerability privately
+    url: https://github.com/anatolek/helm-charts/blob/main/SECURITY.md
+    about: Follow the private reporting instructions; do not disclose vulnerabilities in public issues.
+  - name: Accessibility barriers
+    url: https://github.com/anatolek/helm-charts/blob/main/ACCESSIBILITY.md
+    about: Find guidance for reporting barriers in documentation and project interfaces.

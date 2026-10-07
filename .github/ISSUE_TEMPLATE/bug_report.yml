@@ -1,0 +1,61 @@
+name: Bug report
+description: Report unexpected behavior in hlib templates, generated resources, or documentation.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Search existing issues before reporting a bug. For usage questions, see
+        [SUPPORT.md](https://github.com/anatolek/helm-charts/blob/main/SUPPORT.md).
+        Report vulnerabilities privately using
+        [SECURITY.md](https://github.com/anatolek/helm-charts/blob/main/SECURITY.md).
+        Remove secrets and personal information from all examples and logs.
+  - type: input
+    id: hlib-version
+    attributes:
+      label: hlib version
+      description: The library version used by your consumer chart; use N/A for documentation-only reports.
+    validations:
+      required: true
+  - type: input
+    id: helm-version
+    attributes:
+      label: Helm version
+      description: Output of helm version --short; use N/A if the report does not involve Helm.
+    validations:
+      required: true
+  - type: input
+    id: kubernetes-version
+    attributes:
+      label: Kubernetes version
+      description: Include the cluster version or --kube-version value if relevant; otherwise leave blank.
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include sanitized Chart.yaml dependencies, values, template includes, and commands, or steps to reproduce a documentation problem.
+      placeholder: |
+        1. Create a minimal consumer chart using...
+        2. Set these values and include this hlib template...
+        3. Run helm template ... or helm lint ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: Describe the expected result and include expected manifest snippets if useful.
+    validations:
+      required: true
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual behavior
+      description: Describe what happened and include sanitized rendered output or error messages.
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Related issues, workarounds, or other details that help investigate the problem.

@@ -134,3 +134,8 @@ helm package <helm_chart_location>
 Contributions are welcome! Please read the [contributor guide](CONTRIBUTING.md) for the
 development setup, how to run checks locally, code and documentation conventions,
 versioning rules, and pull request expectations.
+
+For usage questions and help, see [SUPPORT.md](SUPPORT.md). Community participation
+follows the [code of conduct](CODE_OF_CONDUCT.md). Report suspected vulnerabilities
+privately using the [security policy](SECURITY.md), and see the
+[accessibility statement](ACCESSIBILITY.md) for reporting barriers.

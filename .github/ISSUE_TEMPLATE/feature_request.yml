@@ -1,0 +1,35 @@
+name: Feature request
+description: Propose a new template, configurable behavior, or documentation improvement.
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Search existing issues and describe the use case before proposing a solution.
+        For usage questions, see
+        [SUPPORT.md](https://github.com/anatolek/helm-charts/blob/main/SUPPORT.md).
+        Keep configuration examples free of secrets and personal information.
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Problem or use case
+      description: What are you trying to accomplish, and what limitation do you encounter?
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-behavior
+    attributes:
+      label: Proposed behavior
+      description: Describe the template, values, documentation, or rendered resources you would like to see.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe existing hlib options, consumer-chart workarounds, or other approaches you considered.
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Include relevant versions, Kubernetes API references, sanitized examples, or compatibility considerations.
